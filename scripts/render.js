@@ -12,11 +12,22 @@
  */
 import { MODULE_ID, getRadius, getOrigin, getPaletteOverride } from "./settings.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
-import { hexShapePoints, zonePolygon, pathPoints, tileCenter, neighbors } from "./geometry.js";
+import { hexShapePoints, zonePolygon, pathPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
 import { getEffectiveContent } from "./fog.js";
 
 const LINK_MARKER_COLOR = 0x00bcd4;
+
+/** How many rings of empty hexes to draw when a scene has no authored hexes
+ * at all. Without this, a brand-new scene renders nothing whatsoever - no
+ * grid, nothing to click on - since the normal "authored hex + its
+ * neighbors" rule has nothing to start from. Confirmed live: a scene with
+ * zero hexes rendered a fully blank layer. Centered on the scene's own
+ * center rather than world (0,0)/the origin setting - confirmed live that
+ * Foundry's default camera position looks at the scene center, which for
+ * a typical scene is nowhere near world (0,0), so a grid seeded there
+ * would be just as invisible without the GM first panning to find it. */
+const STARTER_GRID_RANGE = 3;
 
 const DEFAULT_TERRAIN_COLORS = {
   plains: 0x90ee90,
@@ -143,10 +154,19 @@ export async function renderHexes(container, scene, { isGM }) {
   const hexes = new Map(Object.entries(raw).map(([k, v]) => [k, normalizeHexContent(v)]));
 
   const allCells = new Set(hexes.keys());
-  for (const key of [...hexes.keys()]) {
-    const { col, row } = parseHexKey(key);
-    for (const [nc, nr] of Object.values(neighbors(col, row))) {
-      allCells.add(hexKey(nc, nr));
+  if (hexes.size === 0) {
+    const centerX = (scene.width ?? radius * 6) / 2;
+    const centerY = (scene.height ?? radius * 6) / 2;
+    const seed = pointToHex(centerX, centerY, radius, origin) ?? { col: 0, row: 0 };
+    for (const [c, r] of neighborsWithinRange(seed.col, seed.row, STARTER_GRID_RANGE)) {
+      allCells.add(hexKey(c, r));
+    }
+  } else {
+    for (const key of [...hexes.keys()]) {
+      const { col, row } = parseHexKey(key);
+      for (const [nc, nr] of Object.values(neighbors(col, row))) {
+        allCells.add(hexKey(nc, nr));
+      }
     }
   }
 

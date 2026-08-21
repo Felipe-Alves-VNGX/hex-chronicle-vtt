@@ -11,11 +11,17 @@ from the same file format. See [CREDITS.md](CREDITS.md) for full attribution
 (hex-chronicle, its icon assets from game-icons.net, and the vendored
 js-yaml library).
 
-> **Status**: early port (see the project plan). The Foundry-API-facing code
-> (canvas layer registration, ApplicationV2 forms, scene-controls hook) has
-> not yet been exercised against a real running Foundry client - it was
-> written against current v13/v14 API documentation but should be verified
-> in a real world before relying on it. See "Verifying this build" below.
+> **Status**: verified against a real Foundry v13 (Build 351) world as of
+> v0.2.3. Confirmed working: the module loads and the layer registers with
+> no errors, the Hex Chronicle scene-controls tab activates the layer, all
+> four canvas-click tools (Edit, Reveal Terrain, Reveal Structure, Open
+> Link) resolve the right hex and do the right thing, the editor form
+> renders and saves correctly, and a scene with zero hexes now shows a
+> starter grid instead of nothing. Not yet click-tested live: mixed terrain
+> rendering, road/river curves, zone boundary dashing, and bulk import -
+> these go through the same rendering/data-model code paths already
+> exercised, but haven't been eyeballed directly. See "Verifying this
+> build" below if you want to confirm them yourself.
 
 ## Installing
 
