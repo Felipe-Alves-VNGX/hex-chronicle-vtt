@@ -1,0 +1,45 @@
+<header class="hex-chronicle-header">
+  <p>{{localize "HEXCHRON.EditorHint"}}</p>
+</header>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldTerrainType"}}</label>
+  <select name="terrainType">
+    {{selectOptions terrainTypes selected=terrainType blank=""}}
+  </select>
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldMixedTerrain"}}</label>
+  <textarea name="mixedTerrain" rows="3" placeholder="lake: C&#10;marsh: SW">{{mixedTerrain}}</textarea>
+  <p class="hint">{{localize "HEXCHRON.FieldMixedTerrainHint"}}</p>
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldIcon"}}</label>
+  <input type="text" name="icon" value="{{icon}}" placeholder="fortin" />
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldAlt"}}</label>
+  <input type="text" name="alt" value="{{alt}}" />
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldRoads"}}</label>
+  <textarea name="roads" rows="2" placeholder="SW SE">{{roads}}</textarea>
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldRivers"}}</label>
+  <textarea name="rivers" rows="2" placeholder="N S">{{rivers}}</textarea>
+</div>
+
+<div class="form-group">
+  <label>{{localize "HEXCHRON.FieldZone"}}</label>
+  <input type="text" name="zone" value="{{zone}}" placeholder="secured, dangerous" />
+</div>
+
+<footer class="form-footer">
+  <button type="submit"><i class="fa-solid fa-check"></i> {{localize "HEXCHRON.Save"}}</button>
+</footer>

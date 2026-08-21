@@ -1,0 +1,20 @@
+.hex-chronicle-editor .form-group {
+  margin-bottom: 0.5rem;
+}
+
+.hex-chronicle-editor textarea {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+}
+
+.hex-chronicle-editor .hint {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin: 0.15rem 0 0;
+}
+
+.hex-chronicle-editor .form-footer {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}
