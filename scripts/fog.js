@@ -19,7 +19,7 @@
  * cost of auto-reveal only working while a GM client is connected.
  */
 import { MODULE_ID, getRadius, getOrigin, isAutoRevealEnabled, getAutoRevealRadius } from "./settings.js";
-import { hexKey } from "./data-model.js";
+import { hexKey, normalizeHexContent, stripStructure } from "./data-model.js";
 import { neighborsWithinRange, pointToHex } from "./geometry.js";
 
 export function getExploredMap(scene = canvas.scene) {
@@ -51,6 +51,60 @@ export async function toggleHex(col, row, scene = canvas.scene) {
 
 export async function resetFog(scene = canvas.scene) {
   return scene.unsetFlag(MODULE_ID, "explored");
+}
+
+/**
+ * "Structure discovered" state - a second, independent fog layer gating
+ * only a hex's *explicit building icon* (and its label/link, see
+ * data-model.js's stripStructure), not its terrain. Lets a hex read as
+ * "explored forest" to players while a hidden ruin/fort on it stays
+ * unknown until the GM specifically reveals it - unlike terrain, this is
+ * never auto-revealed by token movement, since "finding" a structure is
+ * normally a deliberate narrative/GM decision, not just walking through
+ * the hex.
+ */
+export function getStructureRevealedMap(scene = canvas.scene) {
+  return scene?.getFlag(MODULE_ID, "structuresRevealed") ?? {};
+}
+
+export function isStructureRevealed(col, row, scene = canvas.scene) {
+  return !!getStructureRevealedMap(scene)[hexKey(col, row)];
+}
+
+export async function toggleStructure(col, row, scene = canvas.scene) {
+  const key = hexKey(col, row);
+  const current = getStructureRevealedMap(scene);
+  return scene.setFlag(MODULE_ID, "structuresRevealed", { ...current, [key]: !current[key] });
+}
+
+export async function setStructureRevealed(col, row, value, scene = canvas.scene) {
+  const key = hexKey(col, row);
+  const current = getStructureRevealedMap(scene);
+  return scene.setFlag(MODULE_ID, "structuresRevealed", { ...current, [key]: !!value });
+}
+
+/** Raw, un-gated hex content (normalized), or null if nothing is authored
+ * there yet. Only ever call this for GM-side logic; player-facing code
+ * should use getEffectiveContent() below. */
+export function getRawHexContent(col, row, scene = canvas.scene) {
+  const raw = scene?.getFlag(MODULE_ID, "hexes")?.[hexKey(col, row)];
+  return raw ? normalizeHexContent(raw) : null;
+}
+
+/** The content a given viewer is actually allowed to see for one hex: the
+ * GM always sees everything; a non-GM viewer sees "unknown" terrain for an
+ * unexplored hex, and - even once explored - has any structure (building
+ * icon/label/link) stripped until it's been separately revealed. This is
+ * the single source of truth for hex visibility, shared by render.js
+ * (drawing) and layer.js (the "Open Link" tool, so it can't leak a link
+ * the player shouldn't see yet). */
+export function getEffectiveContent(col, row, scene = canvas.scene, isGM = game.user.isGM) {
+  if (isGM) return getRawHexContent(col, row, scene) ?? normalizeHexContent({});
+  if (!isExplored(col, row, scene)) return normalizeHexContent({ terrain: { type: "unknown" } });
+
+  const content = getRawHexContent(col, row, scene) ?? normalizeHexContent({});
+  if (content.icon && !isStructureRevealed(col, row, scene)) return stripStructure(content);
+  return content;
 }
 
 /** Registers the automatic reveal-on-token-move trigger. Only the GM's

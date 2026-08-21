@@ -43,6 +43,17 @@ Hooks.on("getSceneControlButtons", (controls) => {
         icon: "fa-solid fa-eye",
         visible: game.user.isGM,
       },
+      revealStructure: {
+        name: "revealStructure",
+        title: "HEXCHRON.ToolRevealStructure",
+        icon: "fa-solid fa-tower-observation",
+        visible: game.user.isGM,
+      },
+      open: {
+        name: "open",
+        title: "HEXCHRON.ToolOpen",
+        icon: "fa-solid fa-link",
+      },
       import: {
         name: "import",
         title: "HEXCHRON.ToolImport",

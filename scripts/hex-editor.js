@@ -7,11 +7,25 @@
  *   mixedTerrain: "lake: C\nmarsh: SW"
  *   roads/rivers: "SW SE" (one path per line)
  *   zone: "secured, dangerous" (comma-separated)
+ *
+ * The "link" field accepts a Foundry document UUID either typed by hand or
+ * dropped from the sidebar (a Journal Entry, a specific page, or a Scene) -
+ * same drag-and-drop convention Foundry's own document-link fields use.
+ * "Structure revealed to players" is a shortcut for the same toggle the
+ * "Reveal/Hide Structure" canvas tool provides (see fog.js), so the GM
+ * doesn't have to leave the form to flip it.
  */
 import { MODULE_ID } from "./settings.js";
 import { normalizeHexContent, hexKey, TERRAIN_TYPES } from "./data-model.js";
+import { isStructureRevealed, setStructureRevealed } from "./fog.js";
+import { openHexLink } from "./links.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+
+function getDragEventData(event) {
+  const impl = foundry.applications?.ux?.TextEditor?.implementation ?? globalThis.TextEditor;
+  return impl?.getDragEventData?.(event) ?? null;
+}
 
 function splitLines(text) {
   return (text ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
@@ -62,7 +76,27 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       roads: content.roads.join("\n"),
       rivers: content.rivers.join("\n"),
       zone: content.zone.join(", "),
+      link: content.link,
+      structureRevealed: isStructureRevealed(this.col, this.row, scene),
     };
+  }
+
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+
+    const linkInput = this.element.querySelector('input[name="link"]');
+    if (linkInput) {
+      linkInput.addEventListener("dragover", (event) => event.preventDefault());
+      linkInput.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const data = getDragEventData(event);
+        if (data?.uuid) linkInput.value = data.uuid;
+      });
+    }
+
+    this.element.querySelector('[data-action="openLink"]')?.addEventListener("click", () => {
+      openHexLink(linkInput?.value);
+    });
   }
 
   static async #onSubmit(event, form, formData) {
@@ -79,11 +113,13 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       zone: data.zone
         ? data.zone.split(",").map((z) => z.trim()).filter(Boolean)
         : [],
+      link: data.link,
     };
     const content = normalizeHexContent(raw);
 
     const scene = canvas.scene;
     await scene.setFlag(MODULE_ID, `hexes.${hexKey(this.col, this.row)}`, content);
+    await setStructureRevealed(this.col, this.row, !!data.structureRevealed, scene);
     await canvas.hexChronicle?.refresh();
   }
 }

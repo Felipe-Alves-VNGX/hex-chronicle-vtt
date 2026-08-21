@@ -18,3 +18,12 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.hex-chronicle-editor .form-fields {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.hex-chronicle-editor .form-fields input {
+  flex: 1;
+}

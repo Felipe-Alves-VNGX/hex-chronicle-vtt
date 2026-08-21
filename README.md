@@ -59,22 +59,40 @@ workflow, not by hand.
   type, mixed terrain overrides, building icon, label, roads, rivers, and
   zones. See the field hints in the form; the metadata mirrors the original
   Markdown frontmatter format field-for-field.
-- **Reveal/Hide Hex** (GM only): click a hex to toggle whether players can
-  see it (see "Exploration / fog-of-war" below).
+- **Reveal/Hide Terrain** (GM only): click a hex to toggle whether players
+  can see its terrain at all (see "Exploration / fog-of-war" below).
+- **Reveal/Hide Structure** (GM only): click a hex to toggle whether its
+  building icon/label/link are visible to players, independent of terrain
+  exploration (see "Exploration / fog-of-war" below).
+- **Open Link** (everyone): click a hex to open whatever Journal Entry,
+  Journal page, or Scene it's linked to, subject to normal Foundry
+  permissions (see "Linking hexes" below). A small dot in a hex's corner
+  marks that it has a link.
 - **Import Hex Files** (GM only): pick one or more `.md` (hex-chronicle
   frontmatter) or `.yaml`/`.yml` files - same format the original CLI tool
   reads - to populate the current scene in one shot.
 
 ## Exploration / fog-of-war
 
-Hexes a group hasn't explored yet are drawn as "unknown" (gray, no
-icon/label/roads/rivers) to non-GM players; the GM always sees everything.
-Exploration is shared by the whole party (one state per hex, not per
-player), and a hex can be revealed:
+Fog-of-war has two independent layers, so a hex's terrain and whatever's
+*built* on it can be revealed separately:
 
-- **Manually**, with the "Reveal/Hide Hex" tool, or
-- **Automatically**, when a player token moves into it (toggle in module
-  settings, along with how many rings of neighboring hexes to reveal too).
+- **Terrain**: hexes a group hasn't explored yet are drawn as "unknown"
+  (gray, no icon/label/roads/rivers/link) to non-GM players; the GM always
+  sees everything. A hex's terrain can be revealed:
+  - **Manually**, with the "Reveal/Hide Terrain" tool, or
+  - **Automatically**, when a player token moves into it (toggle in module
+    settings, along with how many rings of neighboring hexes to reveal too).
+- **Structure**: even once a hex's terrain is explored, its building icon,
+  label, and any linked Journal/Scene stay hidden from players until the
+  GM separately reveals them - with the "Reveal/Hide Structure" tool, or
+  the "Structure revealed to players" checkbox in the hex editor. This is
+  never automatic (finding a hidden fort/ruin is normally a deliberate
+  narrative beat, not just walking through the hex), and it only applies to
+  hexes that actually have a building icon set - a hex with no icon has
+  nothing to "discover" beyond its terrain.
+
+Both are shared by the whole party (one state per hex, not per player).
 
 **Secrecy is "soft"**: hex content isn't cryptographically hidden from
 players - it lives in a normal Scene flag, which any client with scene
@@ -87,6 +105,20 @@ not something this version provides.
 Auto-reveal only takes effect while the GM's client is connected (the GM
 client is the one that writes the "explored" flag, since only the GM has
 write permission on the Scene by default).
+
+## Linking hexes to Journals and Scenes
+
+A hex can carry a `link` to a Journal Entry, a specific page in one, or a
+Scene - the hex-chronicle equivalent of Foundry's native Journal/Scene Note
+pins, but attached to the hex itself. In the hex editor, either paste a
+document UUID into the "Linked Journal/Scene" field or drag the document
+from the sidebar onto it (same convention Foundry's own document-link
+fields use). The "Open Link" canvas tool - available to GM and players
+alike - resolves and opens it: a Scene link calls `Scene#view()` to
+activate it, a Journal Entry/page link opens its sheet. Normal Foundry
+document permissions apply automatically, and a link is subject to the
+same structure-reveal gating as a hex's icon (see above) - players can't
+open a link they haven't discovered yet.
 
 ## Settings
 
@@ -111,6 +143,12 @@ real v13 or v14 world:
 4. Reload the scene and confirm the map re-renders identically from the
    saved flag data.
 5. Log in as a non-GM player in a second session and confirm unexplored
-   hexes render as "unknown", the reveal tool is hidden, and moving a token
-   into a hex reveals it automatically (with auto-reveal on and the GM
-   client connected).
+   hexes render as "unknown", the terrain/structure reveal tools are hidden,
+   and moving a token into a hex reveals its terrain automatically (with
+   auto-reveal on and the GM client connected).
+6. On a hex with a building icon, confirm the player sees its terrain but
+   not the icon/label/link marker until "Reveal/Hide Structure" is used (or
+   the editor's checkbox is ticked) - then confirm it appears.
+7. Set a hex's link to a Journal Entry (drag one from the sidebar onto the
+   editor field) and confirm both GM and player can open it with "Open
+   Link" once the hex/structure is visible to them.

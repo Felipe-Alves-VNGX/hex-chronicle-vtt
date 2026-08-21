@@ -14,7 +14,9 @@ import { MODULE_ID, getRadius, getOrigin, getPaletteOverride } from "./settings.
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
 import { hexShapePoints, zonePolygon, pathPoints, tileCenter, neighbors } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
-import { isExplored } from "./fog.js";
+import { getEffectiveContent } from "./fog.js";
+
+const LINK_MARKER_COLOR = 0x00bcd4;
 
 const DEFAULT_TERRAIN_COLORS = {
   plains: 0x90ee90,
@@ -113,9 +115,9 @@ async function getIconTexture(iconPath) {
   }
 }
 
-async function preloadIcons(hexes) {
+async function preloadIcons(contents) {
   const paths = new Set();
-  for (const content of hexes.values()) {
+  for (const content of contents) {
     const icon = resolveIcon(content);
     if (icon) paths.add(icon);
   }
@@ -124,7 +126,14 @@ async function preloadIcons(hexes) {
 
 /** Renders every hex + its neighborhood into `container` (a PIXI.Container
  * owned by HexChronicleLayer). Fully synchronous drawing, but icon textures
- * are preloaded first so nothing pops in mid-frame. */
+ * are preloaded first so nothing pops in mid-frame.
+ *
+ * Visibility (terrain fog + structure-reveal) is resolved once per hex via
+ * fog.js's getEffectiveContent(), so drawing and the "Open Link" tool
+ * (layer.js) can never disagree about what a given viewer is allowed to
+ * see. Zone boundaries are the one thing still read from the raw,
+ * un-gated data, since they're GM-only regardless (see module docstring).
+ */
 export async function renderHexes(container, scene, { isGM }) {
   container.removeChildren().forEach((c) => c.destroy({ children: true }));
 
@@ -132,14 +141,6 @@ export async function renderHexes(container, scene, { isGM }) {
   const origin = getOrigin();
   const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
   const hexes = new Map(Object.entries(raw).map(([k, v]) => [k, normalizeHexContent(v)]));
-
-  await preloadIcons(hexes);
-
-  const contentLayer = new PIXI.Container();
-  const gridLayer = new PIXI.Graphics();
-  const numbersLayer = new PIXI.Container();
-  const zonesLayer = new PIXI.Graphics();
-  container.addChild(contentLayer, gridLayer, numbersLayer, zonesLayer);
 
   const allCells = new Set(hexes.keys());
   for (const key of [...hexes.keys()]) {
@@ -149,11 +150,22 @@ export async function renderHexes(container, scene, { isGM }) {
     }
   }
 
+  const effectiveByKey = new Map();
   for (const key of allCells) {
     const { col, row } = parseHexKey(key);
-    const visible = isGM || isExplored(col, row, scene);
-    const content = visible ? hexes.get(key) ?? normalizeHexContent({}) : normalizeHexContent({ terrain: { type: "unknown" } });
+    effectiveByKey.set(key, getEffectiveContent(col, row, scene, isGM));
+  }
 
+  await preloadIcons(effectiveByKey.values());
+
+  const contentLayer = new PIXI.Container();
+  const gridLayer = new PIXI.Graphics();
+  const numbersLayer = new PIXI.Container();
+  const zonesLayer = new PIXI.Graphics();
+  container.addChild(contentLayer, gridLayer, numbersLayer, zonesLayer);
+
+  for (const [key, content] of effectiveByKey) {
+    const { col, row } = parseHexKey(key);
     drawGrid(gridLayer, col, row, radius, origin);
     drawContent(contentLayer, col, row, radius, origin, content);
     drawNumber(numbersLayer, col, row, radius, origin);
@@ -220,6 +232,15 @@ function drawContent(container, col, row, radius, origin, content) {
     text.anchor.set(0.5);
     text.position.set(pp.C.x, pp.C.y);
     container.addChild(text);
+  }
+
+  if (content.link) {
+    const marker = new PIXI.Graphics();
+    marker.beginFill(LINK_MARKER_COLOR, 0.9);
+    marker.drawCircle(0, 0, Math.max(3, radius * 0.08));
+    marker.endFill();
+    marker.position.set(pp.SE.x, pp.SE.y);
+    container.addChild(marker);
   }
 }
 

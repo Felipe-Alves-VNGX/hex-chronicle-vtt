@@ -13,7 +13,14 @@
  *   roads: ["SW SE"],
  *   rivers: ["N S"],
  *   zone: ["secured"],
+ *   link: "JournalEntry.aBc123" | "Scene.xYz789" | "JournalEntry.aBc123.JournalEntryPage.dEf456",
  * }
+ *
+ * `link` is a Foundry document UUID (see scripts/links.js) that the "Open
+ * Link" tool resolves and opens - a Journal Entry, a specific page in one,
+ * or a Scene to jump to. It's the hex-chronicle equivalent of a native
+ * Foundry Note pin, but attached to the hex itself instead of a separate
+ * canvas pin.
  */
 import { isValidZone, normalizeCardinal } from "./geometry.js";
 
@@ -32,7 +39,7 @@ export const TERRAIN_TYPES = [
 ];
 
 export function emptyHex() {
-  return { terrain: { type: undefined, mixed: [] }, alt: "", icon: "", roads: [], rivers: [], zone: [] };
+  return { terrain: { type: undefined, mixed: [] }, alt: "", icon: "", roads: [], rivers: [], zone: [], link: "" };
 }
 
 function normalizeSides(sides) {
@@ -89,7 +96,18 @@ export function normalizeHexContent(raw = {}) {
   const zone = raw.zone;
   out.zone = Array.isArray(zone) ? zone.filter((z) => typeof z === "string" && z.trim()) : typeof zone === "string" && zone.trim() ? [zone.trim()] : [];
 
+  if (typeof raw.link === "string" && raw.link.trim()) out.link = raw.link.trim();
+
   return out;
+}
+
+/** Returns a copy of `content` with its point-of-interest fields (building
+ * icon, its fallback label, and any linked Journal/Scene) stripped, keeping
+ * base terrain/mixed-terrain/roads/rivers intact. Used to hide a "structure"
+ * from players until it's been specifically discovered - see fog.js -
+ * independent of whether the surrounding terrain has been explored. */
+export function stripStructure(content) {
+  return { ...content, icon: "", alt: "", link: "" };
 }
 
 /** Derives which icon (if any) should be drawn in the hex center, matching

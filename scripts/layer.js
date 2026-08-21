@@ -1,8 +1,10 @@
 /**
  * The interactive canvas overlay. Registered into CONFIG.Canvas.layers
  * (see init.js) under the key "hexChronicle", with its own scene-control
- * group offering three tools: edit a hex's content, reveal/hide a hex
- * (GM-only), and bulk-import a file.
+ * group offering five tools: edit a hex's content (GM), reveal/hide a
+ * hex's terrain (GM), reveal/hide a hex's structure (GM), open a hex's
+ * linked Journal/Scene (everyone, subject to normal Foundry permissions),
+ * and bulk-import a file (GM).
  *
  * NOTE: this targets the ApplicationV2-era Foundry API (v13/v14) described
  * in the plan. It has not been exercised inside a real Foundry client in
@@ -14,8 +16,9 @@
 import { getRadius, getOrigin } from "./settings.js";
 import { pointToHex } from "./geometry.js";
 import { renderHexes } from "./render.js";
-import { toggleHex } from "./fog.js";
+import { toggleHex, toggleStructure, getEffectiveContent } from "./fog.js";
 import { HexEditor } from "./hex-editor.js";
+import { openHexLink } from "./links.js";
 
 const InteractionLayerBase = foundry.canvas?.layers?.InteractionLayer ?? globalThis.InteractionLayer;
 
@@ -51,12 +54,25 @@ export class HexChronicleLayer extends InteractionLayerBase {
     if (!hex) return;
 
     const tool = ui.controls.control?.activeTool;
+
+    if (tool === "open") {
+      // Available to everyone - getEffectiveContent() already strips the
+      // link for anything the current viewer hasn't discovered yet, so
+      // there's nothing extra to gate here.
+      const content = getEffectiveContent(hex.col, hex.row, canvas.scene, game.user.isGM);
+      openHexLink(content.link);
+      return;
+    }
+
+    if (!game.user.isGM) return; // every other tool is GM-only in v1
     if (tool === "reveal") {
-      if (!game.user.isGM) return;
       toggleHex(hex.col, hex.row).then(() => this.refresh());
       return;
     }
-    if (!game.user.isGM) return; // edit is GM-only in v1
+    if (tool === "revealStructure") {
+      toggleStructure(hex.col, hex.row).then(() => this.refresh());
+      return;
+    }
     new HexEditor({ col: hex.col, row: hex.row }).render(true);
   }
 }
