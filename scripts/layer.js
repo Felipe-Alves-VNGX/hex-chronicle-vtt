@@ -37,6 +37,12 @@ export class HexChronicleLayer extends InteractionLayerBase {
     this.container = this.addChild(new PIXI.Container());
     this.hitArea = canvas.dimensions.rect;
     this.eventMode = "static";
+    // A plain InteractionLayer (unlike PlaceablesLayer) never creates a
+    // mouseInteractionManager, so nothing calls _onClickLeft() on its own
+    // even though the method name/signature matches Foundry's convention -
+    // confirmed live against a real v13 world (PIXI "pointerup" reaches the
+    // layer fine; _onClickLeft simply never gets invoked without this).
+    this.on("pointerup", this._onClickLeft.bind(this));
     await this.refresh();
   }
 
@@ -53,7 +59,11 @@ export class HexChronicleLayer extends InteractionLayerBase {
     const hex = pointToHex(local.x, local.y, getRadius(), getOrigin());
     if (!hex) return;
 
-    const tool = ui.controls.control?.activeTool;
+    // ui.controls.control.activeTool is just the control's static default
+    // and is never updated after a tool click - confirmed live against a
+    // real v13 world. The tool actually selected right now lives on
+    // ui.controls.activeTool (top-level), which is what we must read here.
+    const tool = ui.controls.activeTool;
 
     if (tool === "open") {
       // Available to everyone - getEffectiveContent() already strips the
