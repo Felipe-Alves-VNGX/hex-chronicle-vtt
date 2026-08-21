@@ -36,7 +36,10 @@ export class HexChronicleLayer extends InteractionLayerBase {
     await super._draw(options);
     this.container = this.addChild(new PIXI.Container());
     this.hitArea = canvas.dimensions.rect;
-    this.eventMode = "static";
+    // Starts inactive - _activate()/_deactivate() (below) are what actually
+    // turn pointer handling on/off, driven by whichever scene-controls
+    // group is currently selected.
+    this.eventMode = "none";
     // A plain InteractionLayer (unlike PlaceablesLayer) never creates a
     // mouseInteractionManager, so nothing calls _onClickLeft() on its own
     // even though the method name/signature matches Foundry's convention -
@@ -44,6 +47,21 @@ export class HexChronicleLayer extends InteractionLayerBase {
     // layer fine; _onClickLeft simply never gets invoked without this).
     this.on("pointerup", this._onClickLeft.bind(this));
     await this.refresh();
+  }
+
+  _activate() {
+    super._activate();
+    // Only steal pointer events from whatever's underneath (tokens, walls,
+    // ...) while our own tool group is actually selected. Without this the
+    // layer stayed interactive permanently (set once in _draw and never
+    // revisited), so clicking anywhere on the canvas - with ANY tool from
+    // ANY control group - hit our handler too, confirmed live.
+    this.eventMode = "static";
+  }
+
+  _deactivate() {
+    super._deactivate();
+    this.eventMode = "none";
   }
 
   async refresh() {
@@ -85,6 +103,12 @@ export class HexChronicleLayer extends InteractionLayerBase {
       toggleStructure(hex.col, hex.row).then(() => this.refresh());
       return;
     }
-    new HexEditor({ col: hex.col, row: hex.row }).render(true);
+    // Explicit check, not a bare fallback: with the layer only interactive
+    // while active (see _activate() above) this shouldn't be reachable
+    // with an unrecognized tool anymore, but it's cheap insurance against
+    // ever again silently opening the editor for a tool that isn't "edit".
+    if (tool === "edit") {
+      new HexEditor({ col: hex.col, row: hex.row }).render(true);
+    }
   }
 }

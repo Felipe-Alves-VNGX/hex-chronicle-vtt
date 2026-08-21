@@ -68,7 +68,12 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       col: this.col,
       row: this.row,
-      terrainTypes: TERRAIN_TYPES,
+      // {{selectOptions}} uses the ARRAY INDEX as an <option>'s value when
+      // given a plain array - confirmed live: picking "heavy_woods" (index
+      // 2) silently saved terrain.type as "2", not "heavy_woods", for
+      // every hex ever set through this dropdown. An object maps each
+      // option's real value to its own label instead.
+      terrainTypes: Object.fromEntries(TERRAIN_TYPES.map((t) => [t, t])),
       terrainType: content.terrain.type ?? "",
       mixedTerrain: content.terrain.mixed.map((m) => `${m.type}: ${m.sides.join(" ")}`).join("\n"),
       alt: content.alt,
