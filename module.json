@@ -10,6 +10,10 @@
   },
   "authors": [
     {
+      "name": "Felipe Alves",
+      "flags": { "role": "FoundryVTT port author" }
+    },
+    {
       "name": "Guillaume Fouillet",
       "flags": { "role": "original hex-chronicle author" }
     }
