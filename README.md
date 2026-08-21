@@ -9,7 +9,8 @@ This is a JavaScript port of **[hex-chronicle](https://github.com/)**, a
 Python CLI tool by **Guillaume Fouillet** that generates static SVG hex maps
 from the same file format. See [CREDITS.md](CREDITS.md) for full attribution
 (hex-chronicle, its icon assets from game-icons.net, and the vendored
-js-yaml library).
+js-yaml library), and [ROADMAP.md](ROADMAP.md) for what's done and what's
+still planned.
 
 > **Status**: verified against a real Foundry v13 (Build 351) world as of
 > v0.2.3. Confirmed working: the module loads and the layer registers with
