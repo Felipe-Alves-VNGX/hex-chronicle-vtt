@@ -1,20 +1,92 @@
+.hex-chronicle-editor .hex-chronicle-hint {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0 0 0.75rem;
+  font-style: italic;
+}
+
+.hex-chronicle-editor fieldset {
+  border: 1px solid var(--color-border-light-tertiary, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem 0.5rem;
+}
+
+.hex-chronicle-editor legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.9;
+}
+
+.hex-chronicle-editor legend i {
+  opacity: 0.75;
+}
+
 .hex-chronicle-editor .form-group {
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.hex-chronicle-editor .form-group.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+}
+
+.hex-chronicle-editor .form-group > label {
+  flex: 0 0 auto;
+  min-width: 7rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.hex-chronicle-editor .form-group.stacked > label {
+  min-width: 0;
+}
+
+.hex-chronicle-editor .form-group select,
+.hex-chronicle-editor .form-group input[type="text"] {
+  flex: 1;
 }
 
 .hex-chronicle-editor textarea {
   font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.hex-chronicle-editor .checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.hex-chronicle-editor .checkbox-row input {
+  flex: 0 0 auto;
+}
+
+.hex-chronicle-editor .hint-icon {
+  opacity: 0.6;
+  font-size: 0.75rem;
+  cursor: help;
 }
 
 .hex-chronicle-editor .hint {
-  font-size: 0.75rem;
-  opacity: 0.75;
-  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin: 0.1rem 0 0;
 }
 
 .hex-chronicle-editor .form-footer {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   display: flex;
   justify-content: flex-end;
 }

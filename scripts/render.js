@@ -16,7 +16,7 @@ import { hexShapePoints, zonePolygon, pathPoints, tileCenter, neighbors, neighbo
 import { zoneClusterLoops } from "./zone-cluster.js";
 import { getEffectiveContent } from "./fog.js";
 
-const LINK_MARKER_COLOR = 0x00bcd4;
+const LINK_MARKER_COLOR = 0x26c6da;
 
 /** How many rings of empty hexes to draw when a scene has no authored hexes
  * at all. Without this, a brand-new scene renders nothing whatsoever - no
@@ -29,27 +29,30 @@ const LINK_MARKER_COLOR = 0x00bcd4;
  * would be just as invisible without the GM first panning to find it. */
 const STARTER_GRID_RANGE = 3;
 
+// A more muted, natural palette than the original tool's flat websafe
+// colors (pure lightgreen/maroon/bisque read as harsh/cartoonish on a
+// real map) - same semantic terrain-to-hue mapping, just toned down.
 const DEFAULT_TERRAIN_COLORS = {
-  plains: 0x90ee90,
-  light_wood: 0x008000,
-  heavy_woods: 0x006400,
-  grassland: 0x7fff00,
-  mountains: 0x800000,
-  hills: 0xffe4c4,
-  sea: 0x0000ff,
-  lake: 0x87cefa,
-  marsh: 0x9acd32,
-  desert: 0xffffe0,
-  unknown: 0x808080,
+  plains: 0xb5c98e,
+  light_wood: 0x6b8f5c,
+  heavy_woods: 0x35502e,
+  grassland: 0x8fbf5a,
+  mountains: 0x8c7a6b,
+  hills: 0xc9ad80,
+  sea: 0x2e6f95,
+  lake: 0x6fb3c2,
+  marsh: 0x76824a,
+  desert: 0xe3c77d,
+  unknown: 0x5a5a5a,
 };
 
 const DEFAULT_ZONE_COLORS = {
-  secured: 0x008000,
+  secured: 0x3f9142,
 };
 
-const GRID_COLOR = 0x8e8e8e;
-const ROAD_COLOR = 0x8b4513;
-const RIVER_COLOR = 0x0000ff;
+const GRID_COLOR = 0x707070;
+const ROAD_COLOR = 0x8b5a2b;
+const RIVER_COLOR = 0x3a7ca5;
 
 const textureCache = new Map();
 
@@ -209,7 +212,7 @@ export async function renderHexes(container, scene, { isGM }) {
 
 function drawGrid(graphics, col, row, radius, origin) {
   const pts = hexShapePoints(col, row, radius, origin);
-  graphics.lineStyle(Math.max(1, radius / 15), GRID_COLOR, 1);
+  graphics.lineStyle(Math.max(1, radius / 20), GRID_COLOR, 0.6);
   const flat = pts.flatMap((p) => [p.x, p.y]);
   graphics.drawPolygon(flat);
 }
@@ -290,12 +293,15 @@ function drawContent(container, col, row, radius, origin, content) {
 function drawNumber(container, col, row, radius, origin) {
   const { x, y } = tileCenter(col, row, radius, origin);
   const text = new PIXI.Text(`${String(row).padStart(2, "0")}.${String(col).padStart(2, "0")}`, {
-    fontSize: radius * 0.2,
-    fill: 0xffffff,
+    fontFamily: "Signika, sans-serif",
+    fontSize: Math.max(9, radius * 0.16),
+    fill: 0xe6e6e6,
     stroke: 0x000000,
-    strokeThickness: Math.max(1, radius / 25),
+    strokeThickness: Math.max(1, radius / 40),
   });
-  text.position.set(x - radius * 0.85, y - radius * 0.75);
+  text.alpha = 0.85;
+  text.anchor.set(0, 0.5);
+  text.position.set(x - radius * 0.55, y - radius * 0.55);
   container.addChild(text);
 }
 
