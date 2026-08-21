@@ -1,62 +1,64 @@
-<header class="hex-chronicle-header">
-  <p>{{localize "HEXCHRON.EditorHint"}}</p>
-</header>
+<div class="hex-chronicle-fields">
+  <header class="hex-chronicle-header">
+    <p>{{localize "HEXCHRON.EditorHint"}}</p>
+  </header>
 
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldTerrainType"}}</label>
-  <select name="terrainType">
-    {{selectOptions terrainTypes selected=terrainType blank=""}}
-  </select>
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldMixedTerrain"}}</label>
-  <textarea name="mixedTerrain" rows="3" placeholder="lake: C&#10;marsh: SW">{{mixedTerrain}}</textarea>
-  <p class="hint">{{localize "HEXCHRON.FieldMixedTerrainHint"}}</p>
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldIcon"}}</label>
-  <input type="text" name="icon" value="{{icon}}" placeholder="fortin" />
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldAlt"}}</label>
-  <input type="text" name="alt" value="{{alt}}" />
-</div>
-
-<div class="form-group">
-  <label>
-    <input type="checkbox" name="structureRevealed" {{#if structureRevealed}}checked{{/if}} />
-    {{localize "HEXCHRON.FieldStructureRevealed"}}
-  </label>
-  <p class="hint">{{localize "HEXCHRON.FieldStructureRevealedHint"}}</p>
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldRoads"}}</label>
-  <textarea name="roads" rows="2" placeholder="SW SE">{{roads}}</textarea>
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldRivers"}}</label>
-  <textarea name="rivers" rows="2" placeholder="N S">{{rivers}}</textarea>
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldZone"}}</label>
-  <input type="text" name="zone" value="{{zone}}" placeholder="secured, dangerous" />
-</div>
-
-<div class="form-group">
-  <label>{{localize "HEXCHRON.FieldLink"}}</label>
-  <div class="form-fields">
-    <input type="text" name="link" value="{{link}}" placeholder="JournalEntry.xxxx" />
-    <button type="button" data-action="openLink"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldTerrainType"}}</label>
+    <select name="terrainType">
+      {{selectOptions terrainTypes selected=terrainType blank=""}}
+    </select>
   </div>
-  <p class="hint">{{localize "HEXCHRON.FieldLinkHint"}}</p>
-</div>
 
-<footer class="form-footer">
-  <button type="submit"><i class="fa-solid fa-check"></i> {{localize "HEXCHRON.Save"}}</button>
-</footer>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldMixedTerrain"}}</label>
+    <textarea name="mixedTerrain" rows="3" placeholder="lake: C&#10;marsh: SW">{{mixedTerrain}}</textarea>
+    <p class="hint">{{localize "HEXCHRON.FieldMixedTerrainHint"}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldIcon"}}</label>
+    <input type="text" name="icon" value="{{icon}}" placeholder="fortin" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldAlt"}}</label>
+    <input type="text" name="alt" value="{{alt}}" />
+  </div>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="structureRevealed" {{#if structureRevealed}}checked{{/if}} />
+      {{localize "HEXCHRON.FieldStructureRevealed"}}
+    </label>
+    <p class="hint">{{localize "HEXCHRON.FieldStructureRevealedHint"}}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldRoads"}}</label>
+    <textarea name="roads" rows="2" placeholder="SW SE">{{roads}}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldRivers"}}</label>
+    <textarea name="rivers" rows="2" placeholder="N S">{{rivers}}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldZone"}}</label>
+    <input type="text" name="zone" value="{{zone}}" placeholder="secured, dangerous" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.FieldLink"}}</label>
+    <div class="form-fields">
+      <input type="text" name="link" value="{{link}}" placeholder="JournalEntry.xxxx" />
+      <button type="button" data-action="openLink"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+    </div>
+    <p class="hint">{{localize "HEXCHRON.FieldLinkHint"}}</p>
+  </div>
+
+  <footer class="form-footer">
+    <button type="submit"><i class="fa-solid fa-check"></i> {{localize "HEXCHRON.Save"}}</button>
+  </footer>
+</div>

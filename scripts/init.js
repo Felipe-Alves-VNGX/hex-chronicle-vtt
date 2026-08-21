@@ -23,6 +23,21 @@ Hooks.on("updateScene", (scene, changes) => {
   }
 });
 
+/**
+ * Selecting our tab in the scene controls updates `ui.controls.control`
+ * (confirmed live against a real v13 world), but - unlike core layers such
+ * as "tokens" or "notes" - it does NOT automatically call
+ * `canvas.hexChronicle.activate()`, so the canvas keeps whatever layer was
+ * active before and our click handler never receives pointer events. This
+ * hook closes that gap explicitly; core modules registering a custom layer
+ * hit the same issue and use the same fix.
+ */
+Hooks.on("renderSceneControls", () => {
+  if (ui.controls.control?.name === "hexChronicle" && canvas.activeLayer !== canvas.hexChronicle) {
+    canvas.hexChronicle?.activate();
+  }
+});
+
 Hooks.on("getSceneControlButtons", (controls) => {
   controls.hexChronicle = {
     name: "hexChronicle",
