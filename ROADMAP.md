@@ -50,6 +50,60 @@ for attribution and [README.md](README.md) for usage.
   Foundry usa o **índice do array** como valor salvo nesse caso - escolher
   "heavy_woods" salvava `"2"`. Corrigido passando um objeto chave→valor.
 
+### Rodada de testes ao vivo GM + Player (mundo "HUMV Teste")
+Sessão dupla (Gamemaster e TesterPlayer conectados ao mesmo tempo) cobrindo
+o ciclo completo de edição, fog-of-war e permissões. Nenhum bug encontrado
+desta vez - todos os pontos abaixo se comportaram exatamente como
+documentado no código:
+- Editor de hexágono: abrir um hex já preenchido carrega corretamente tipo
+  de terreno, terreno misto (`hills: N`), estradas/rios e zona; salvar um
+  hex novo grava exatamente o que foi digitado e fecha o formulário.
+- Fog de terreno: hex não explorado retorna `terrain.type: "unknown"` e
+  esconde todo o resto (alt, ícone, link, etc.) para um não-GM.
+- Fog de estrutura: mesmo com o hex explorado, um `icon` só aparece pro
+  jogador depois de "Reveal/Hide Structure" - `alt` (label) e `link`
+  ficam escondidos junto até lá.
+- "Open Link": um link autorado num hex não-explorado não vaza (jogador
+  recebe "sem link", não um link quebrado); uma vez explorado, o link
+  aparece e abre a ficha respeitando a permissão real do documento no
+  Foundry (sem permissão → ficha abre vazia; com Observer → conteúdo
+  completo).
+- Confirmado que a ferramenta "edit" fica visível pro jogador (rotulada
+  "Ver Hexágono" em vez de "Editar Hexágono") mas clicar não faz nada -
+  bate com a limitação já registrada abaixo.
+- Achado à parte (não é bug do módulo, é do meu método de limpeza de
+  teste): `Scene#setFlag` faz merge profundo, então reatribuir o objeto
+  inteiro de `hexes` sem uma chave não a remove - é preciso
+  `Scene#unsetFlag(MODULE_ID, "hexes.<key>")` pra apagar de fato.
+
+### Segunda rodada: import em lote, zonas, grade inicial, auto-revelação
+Testado em cenas descartáveis próprias (criadas e apagadas depois, sem
+tocar na cena compartilhada). Também sem bugs novos:
+- **Import em lote**: os `.md`/`.yaml`/`.yml` de `test_files/` importaram
+  certo, inclusive coordenadas negativas (`-01-01-isle.md` → hex `-1,-1`,
+  chaves YAML `"-02-01"`/`"00-01"`), os aliases em francês "NO"/"SO"
+  normalizados pra "NW"/"SW", e um arquivo `.txt` inválido no meio do lote
+  gerou erro isolado sem abortar o resto da importação.
+- **Zona com buraco** (`test-zone-with-hole.yaml`): `zoneClusterLoops()`
+  devolveu exatamente 2 loops pro cluster de 6 hexes em anel - o contorno
+  externo (19 pontos) e o contorno interno do buraco (7 pontos, do hex que
+  fica de fora da zona) - confirmando o caso descrito no comentário do
+  arquivo.
+- **Ícone quebrado não derruba o mapa**: importar hexes com `icon` de
+  nomes que não existem nos assets do módulo (ex.: `ruines`, `capitale`)
+  gerou 404 + `console.warn` (`icon not found: ...`), mas o resto da cena
+  renderizou normalmente - confirma a proteção contra crash já registrada
+  acima.
+- **Grade inicial em cena vazia**: cena nova sem nenhum hex gravado
+  desenhou exatamente 37 células (anel de raio 3), centradas no hex mais
+  próximo do centro real da cena (`scene.width/2, scene.height/2`), não em
+  `(0,0)`.
+- **Auto-revelação por movimento de token**: mover um token com dono
+  jogador pra dentro de um hex não-explorado revela esse hex
+  automaticamente; com a configuração "Auto Reveal" desligada, o mesmo
+  movimento não revela nada. `resetFog()` também testado isoladamente e
+  limpa o flag `explored` inteiro corretamente.
+
 ### Visual
 - Paleta de terreno trocada de cores "clipart" saturadas por tons mais
   naturais/suaves (mesmo mapeamento semântico).

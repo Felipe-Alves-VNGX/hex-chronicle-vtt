@@ -7,11 +7,9 @@
  * and bulk-import a file (GM).
  *
  * NOTE: this targets the ApplicationV2-era Foundry API (v13/v14) described
- * in the plan. It has not been exercised inside a real Foundry client in
- * this environment (no Foundry install available here) - verify against a
- * live v13 or v14 world per the plan's verification section before relying
- * on it, and expect to adjust field names in the scene-controls hook if the
- * exact object shape has moved since this was written.
+ * in the plan. Exercised live against a real v13 world, both as GM and as
+ * a non-GM player - see the inline comments below for what that live
+ * testing turned up.
  */
 import { getRadius, getOrigin } from "./settings.js";
 import { pointToHex } from "./geometry.js";
