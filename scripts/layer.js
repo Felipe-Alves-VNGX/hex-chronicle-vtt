@@ -62,8 +62,10 @@ export class HexChronicleLayer extends InteractionLayerBase {
     // ui.controls.control.activeTool is just the control's static default
     // and is never updated after a tool click - confirmed live against a
     // real v13 world. The tool actually selected right now lives on
-    // ui.controls.activeTool (top-level), which is what we must read here.
-    const tool = ui.controls.activeTool;
+    // ui.controls.tool.name; ui.controls.activeTool is the old (now
+    // deprecated-with-warning) accessor for the same value - fall back to
+    // it only if .tool isn't there for some reason.
+    const tool = ui.controls.tool?.name ?? ui.controls.activeTool;
 
     if (tool === "open") {
       // Available to everyone - getEffectiveContent() already strips the

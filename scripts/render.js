@@ -113,11 +113,22 @@ async function getIconTexture(iconPath) {
   const url = `modules/${MODULE_ID}/assets/icons/${iconPath}.svg`;
   try {
     const texture = await PIXI.Assets.load(url);
+    // A 404 for an .svg asset doesn't always make PIXI.Assets.load() reject -
+    // confirmed live: it can resolve with a texture that has no real
+    // width/height instead. Treat that the same as a load failure, or a
+    // later `new PIXI.Sprite(texture)` throws (crashing the whole render,
+    // not just this one icon) instead of just skipping the missing icon.
+    if (!texture?.width || !texture?.height) {
+      throw new Error("resolved texture has no valid dimensions (likely a missing/malformed asset)");
+    }
     textureCache.set(iconPath, texture);
     return texture;
   } catch (err) {
     // Missing terrain icons are expected (not every terrain has one) -
-    // matches the original renderer's quiet handling of that case.
+    // matches the original renderer's quiet handling of that case. Mixed
+    // terrain "type" is free text (custom terrains are meant to be
+    // supported via custom CSS in the original tool), so a typo or a
+    // made-up type here is normal too, not a bug to report loudly.
     if (!iconPath.startsWith("terrain/")) {
       console.warn(`${MODULE_ID} | icon not found: ${iconPath}`, err);
     }
@@ -234,14 +245,26 @@ function drawContent(container, col, row, radius, origin, content) {
 
   const icon = resolveIcon(content);
   const texture = icon ? textureCache.get(icon) : null;
-  if (texture) {
-    const sprite = new PIXI.Sprite(texture);
-    const scale = (radius * 0.6) / Math.max(texture.width, texture.height) / 1.1;
-    sprite.scale.set(scale);
-    sprite.anchor.set(0.5);
-    sprite.position.set(pp.C.x, pp.C.y);
-    container.addChild(sprite);
-  } else if (content.alt) {
+  // getIconTexture() already validates dimensions before caching, but a
+  // bad/half-loaded texture crashing `new PIXI.Sprite(...)` would otherwise
+  // take down the *entire* map render (every hex, for every viewer) over
+  // one broken icon reference - confirmed live. Guard here too and just
+  // fall back to the label instead of losing the whole map.
+  let iconDrawn = false;
+  if (texture && texture.width && texture.height) {
+    try {
+      const sprite = new PIXI.Sprite(texture);
+      const scale = (radius * 0.6) / Math.max(texture.width, texture.height) / 1.1;
+      sprite.scale.set(scale);
+      sprite.anchor.set(0.5);
+      sprite.position.set(pp.C.x, pp.C.y);
+      container.addChild(sprite);
+      iconDrawn = true;
+    } catch (err) {
+      console.warn(`${MODULE_ID} | failed to draw icon "${icon}", falling back to label`, err);
+    }
+  }
+  if (!iconDrawn && content.alt) {
     const text = new PIXI.Text(content.alt, {
       fontSize: radius * 0.25,
       fill: 0xffffff,
