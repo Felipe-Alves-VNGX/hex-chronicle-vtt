@@ -23,8 +23,8 @@
   "languages": [
     { "lang": "en", "name": "English", "path": "lang/en.json" }
   ],
-  "url": "",
-  "manifest": "",
+  "url": "https://github.com/Felipe-Alves-VNGX/hex-chronicle-vtt",
+  "manifest": "https://github.com/Felipe-Alves-VNGX/hex-chronicle-vtt/releases/latest/download/module.json",
   "download": "",
   "license": "LICENSE"
 }

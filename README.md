@@ -19,14 +19,37 @@ js-yaml library).
 
 ## Installing
 
-Not yet published. To try it locally:
+**Via manifest URL** (once at least one release has been cut - see below):
+in Foundry's "Install Module" dialog, paste
 
-1. Copy this folder into your Foundry `Data/modules/` directory (keeping the
-   folder name `hex-chronicle-vtt`, or update `module.json`'s `id` to match
-   if you rename it).
-2. Enable "Hex Chronicle" in your world's Manage Modules.
-3. Fill in `module.json`'s `url`/`manifest`/`download` fields once you
-   publish a GitHub release, so Foundry can auto-update it.
+```
+https://github.com/Felipe-Alves-VNGX/hex-chronicle-vtt/releases/latest/download/module.json
+```
+
+**Locally, without a release:** copy this folder into your Foundry
+`Data/modules/` directory (keeping the folder name `hex-chronicle-vtt`, or
+update `module.json`'s `id` to match if you rename it), then enable "Hex
+Chronicle" in your world's Manage Modules.
+
+## Cutting a release
+
+The repo is private, so releases are for your own installs/testing, not
+public distribution. `.github/workflows/release.yml` handles the Foundry
+manifest+download convention automatically:
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+Pushing a `vX.Y.Z` tag triggers the workflow, which stamps that version
+number into a copy of `module.json` (setting `download` to that tag's
+`module.zip`, and `manifest` to the stable "latest release" URL above),
+zips the module, and publishes both `module.zip` and the stamped
+`module.json` as release assets. The `module.json` committed to the repo
+is intentionally left with the "latest" manifest URL but no `download` -
+that field is only meaningful per-release and is filled in by the
+workflow, not by hand.
 
 ## Usage
 

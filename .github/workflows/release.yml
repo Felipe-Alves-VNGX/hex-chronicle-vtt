@@ -1,0 +1,45 @@
+name: Release
+
+# Cut a Foundry-compatible release by pushing a tag: git tag v0.2.0 && git push origin v0.2.0
+# This rewrites module.json's version/manifest/download for the tag, zips the
+# module, and publishes both module.zip and the rewritten module.json as
+# release assets - the manifest+download URL pattern Foundry's package
+# manager expects (manifest always resolves to the latest release;
+# download is pinned to this specific tag's zip).
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Stamp version, manifest and download URL into module.json
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg version "$VERSION" \
+             --arg manifest "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/module.json" \
+             --arg download "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/module.zip" \
+             '.version = $version | .manifest = $manifest | .download = $download' \
+             module.json > module.json.tmp
+          mv module.json.tmp module.json
+
+      - name: Package module
+        run: |
+          zip -r module.zip \
+            module.json scripts styles templates lang assets lib \
+            LICENSE LICENSE-hex-chronicle README.md CREDITS.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            module.zip
+            module.json
