@@ -53,6 +53,21 @@ export async function resetFog(scene = canvas.scene) {
   return scene.unsetFlag(MODULE_ID, "explored");
 }
 
+/** UI entry point for the "Reset Fog" scene-control button (layer.js/
+ * init.js): confirms before wiping every hex's explored state back to
+ * unknown for the whole party - resetFog() itself has no undo, so this is
+ * the only guard against a stray click. */
+export async function confirmResetFog(scene = canvas.scene) {
+  const confirmed = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize("HEXCHRON.ResetFogTitle") },
+    content: `<p>${game.i18n.localize("HEXCHRON.ResetFogConfirm")}</p>`,
+  });
+  if (!confirmed) return;
+  await resetFog(scene);
+  await canvas.hexChronicle?.refresh();
+  ui.notifications.info(game.i18n.localize("HEXCHRON.ResetFogSuccess"));
+}
+
 /**
  * "Structure discovered" state - a second, independent fog layer gating
  * only a hex's *explicit building icon* (and its label/link, see

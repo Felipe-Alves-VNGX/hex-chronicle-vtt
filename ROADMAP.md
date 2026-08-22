@@ -156,6 +156,14 @@ tocar na cena compartilhada). Também sem bugs novos:
   ao trocar de ferramenta. Testado ao vivo como GM e como jogador: desenha
   ao entrar num hex, não redesenha à toa dentro do mesmo hex, some ao sair
   do grid e ao desativar a camada, e sobrevive a um `refresh()`.
+- **Botão de resetar fog**: a função `resetFog()` já existia em `fog.js` mas
+  não estava ligada a nada - agora é um botão (`fa-broom`) no grupo Hex
+  Chronicle, GM-only, atrás de um `DialogV2.confirm()` já que é destrutivo e
+  irreversível (limpa a exploração de TODOS os jogadores na cena de uma vez).
+  `confirmResetFog()` em `fog.js` cuida do dialog + reset + refresh da
+  camada. Testado ao vivo como GM: botão só aparece pro GM, cancelar não
+  mexe em nada, confirmar zera o flag `explored` inteiro e dispara a
+  notificação de sucesso.
 
 ## Em aberto / próximos passos
 
@@ -163,8 +171,6 @@ Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
 aproximadamente por esforço/impacto.
 
 ### Ganhos rápidos
-- **Botão de resetar fog** exposto na interface - a função `resetFog()` já
-  existe em `fog.js` mas não está ligada a nenhum botão/ferramenta ainda.
 - **Seletor visual de ícone** com preview (em vez de digitar o nome do arquivo
   de cor).
 

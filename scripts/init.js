@@ -1,6 +1,6 @@
 import { MODULE_ID, registerSettings } from "./settings.js";
 import { HexChronicleLayer } from "./layer.js";
-import { registerAutoRevealHook } from "./fog.js";
+import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
 
 Hooks.once("init", () => {
@@ -76,6 +76,14 @@ Hooks.on("getSceneControlButtons", (controls) => {
         button: true,
         visible: game.user.isGM,
         onChange: () => openImportDialog(),
+      },
+      resetFog: {
+        name: "resetFog",
+        title: "HEXCHRON.ToolResetFog",
+        icon: "fa-solid fa-broom",
+        button: true,
+        visible: game.user.isGM,
+        onChange: () => confirmResetFog(),
       },
     },
   };
