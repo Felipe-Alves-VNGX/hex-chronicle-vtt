@@ -215,15 +215,36 @@ tocar na cena compartilhada). Também sem bugs novos:
   GM vê terreno+zonas, o estado liga/desliga sobrevive a trocar de grupo de
   ferramentas e voltar, e o toggle funciona nos dois sentidos via clique
   real no botão.
-
-## Em aberto / próximos passos
-
-Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
-aproximadamente por esforço/impacto.
-
-### Para overlay em arte customizada
-- **Alça de arrastar** pra reposicionar/escalar a grade visualmente sobre uma
-  imagem de fundo, em vez de digitar offset/raio nas configurações.
+- **Alça de arrastar pra alinhar a grade** (`scripts/layer.js`,
+  `scripts/settings.js`): última ferramenta GM-only do grupo (`fa-crosshairs`,
+  "Align Grid"). Em vez de digitar `originX`/`originY`/`hexRadius` nas
+  configurações do mundo às cegas, agora dá pra arrastar dois pontos direto
+  no canvas - o vermelho move a origem da grade, o azul (posicionado a
+  `origin.x + radius`) redimensiona - com uma grade de pré-visualização (5
+  anéis ao redor do hex 0,0) se movendo em tempo real por cima da arte de
+  fundo da cena, então o alinhamento fica visual em vez de tentativa-e-erro
+  numérico. O preview roda todo em memória (`#dragOrigin`/`#dragRadius`
+  locais); só grava nas configurações do mundo (`setOrigin`/`setRadius`,
+  novos em `settings.js`) uma vez, ao soltar o botão - nunca a cada frame de
+  `pointermove`, pra não martelar o documento de configurações (que é
+  world-scope, replicado por socket) a cada pixel de arraste.
+  Achado ao testar ao vivo, o mais complicado desta rodada: não existe hook
+  do Foundry pra "a ferramenta selecionada dentro do MESMO grupo já ativo
+  mudou" - `renderSceneControls` só dispara numa troca de *grupo* (ex.:
+  Tokens → Hex Chronicle), confirmado lendo o próprio `foundry.mjs`
+  (`SceneControls#onChangeTool` faz um `update()` "leve" pra trocas de
+  ferramenta dentro do grupo, sem re-render completo). Sem esse hook, as
+  alças só apareciam se algo mais forçasse `updateAlignHandles()` depois -
+  meio inútil. Resolvido observando `aria-pressed` nos próprios botões de
+  ferramenta via `MutationObserver` (init.js) - único sinal confiável de
+  qual ferramenta está selecionada dentro do grupo, encontrado batendo o
+  bug ao vivo e não por documentação. Testado ao vivo como GM: as alças
+  aparecem sozinhas ao entrar em "align" e somem ao trocar de ferramenta
+  (sem chamar nada manualmente), arrastar a origem/raio atualiza o preview
+  e grava exatamente o valor certo ao soltar, o raio tem piso de 10px, e um
+  "pointerup" real durante o arraste confirma e não abre o editor de hex
+  por engano (o clique normal fica suprimido enquanto há um arraste em
+  andamento). Botão ausente pra jogador não-GM.
 
 ## Limitações conhecidas (decisões deliberadas, não bugs)
 

@@ -20,6 +20,18 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   registerAutoRevealHook();
+
+  // No hook fires for "the selected tool within an already-active control
+  // group changed" - confirmed live that renderSceneControls only fires on
+  // a *group* switch (e.g. tokens -> Hex Chronicle), not a same-group tool
+  // click (e.g. edit -> align); #onChangeTool's lightweight `update()` path
+  // apparently skips a full re-render. The only reliable signal is each
+  // tool button's own aria-pressed attribute, so watch that directly.
+  const controlsEl = document.getElementById("scene-controls");
+  if (controlsEl) {
+    const observer = new MutationObserver(() => canvas.hexChronicle?.updateAlignHandles());
+    observer.observe(controlsEl, { attributes: true, attributeFilter: ["aria-pressed"], subtree: true });
+  }
 });
 
 Hooks.on("updateScene", (scene, changes) => {
@@ -42,6 +54,11 @@ Hooks.on("renderSceneControls", () => {
   if (ui.controls.control?.name === "hexChronicle" && canvas.activeLayer !== canvas.hexChronicle) {
     canvas.hexChronicle?.activate();
   }
+  // Confirmed live: this hook also fires on a same-group tool click (e.g.
+  // switching from "edit" to "align"), not just on switching control
+  // groups entirely - so this is enough to keep the align tool's drag
+  // handles in sync with whether it's the one currently selected.
+  canvas.hexChronicle?.updateAlignHandles();
 });
 
 Hooks.on("getSceneControlButtons", (controls) => {
@@ -74,6 +91,12 @@ Hooks.on("getSceneControlButtons", (controls) => {
         name: "open",
         title: "HEXCHRON.ToolOpen",
         icon: "fa-solid fa-link",
+      },
+      align: {
+        name: "align",
+        title: "HEXCHRON.ToolAlign",
+        icon: "fa-solid fa-crosshairs",
+        visible: game.user.isGM,
       },
       import: {
         name: "import",

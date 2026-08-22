@@ -66,6 +66,19 @@ export function getRadius() {
   return game.settings.get(MODULE_ID, "hexRadius");
 }
 
+/** Used by the align-tool drag handles (layer.js) to commit a new grid
+ * position/size once, on drag-release - never called per-pointermove-frame,
+ * to avoid hammering the world settings document (and the socket
+ * round-trip that implies) with a write per pixel of mouse movement. */
+export async function setOrigin(x, y) {
+  await game.settings.set(MODULE_ID, "originX", Math.round(x));
+  await game.settings.set(MODULE_ID, "originY", Math.round(y));
+}
+
+export async function setRadius(radius) {
+  await game.settings.set(MODULE_ID, "hexRadius", Math.max(10, Math.round(radius)));
+}
+
 export function isAutoRevealEnabled() {
   return game.settings.get(MODULE_ID, "autoReveal");
 }

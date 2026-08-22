@@ -6,6 +6,7 @@
     "ToolReveal": "Reveal/Hide Terrain",
     "ToolRevealStructure": "Reveal/Hide Structure",
     "ToolOpen": "Open Link",
+    "ToolAlign": "Align Grid (drag the red dot to move, the blue dot to resize)",
     "ToolImport": "Import Hex Files",
     "ToolResetFog": "Reset Fog",
     "ResetFogTitle": "Reset Fog of War",
