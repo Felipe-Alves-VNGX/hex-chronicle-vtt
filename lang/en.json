@@ -24,6 +24,8 @@
     "DirectoryNoMatches": "No hexes match this search.",
     "ToolLegend": "Toggle Legend",
     "LegendTerrain": "Terrain",
+    "LegendZoneKey": "Zone positions",
+    "LegendZoneKeyCaption": "Outer ring: N1-N12. Center ring: C1-C12.",
     "LegendZones": "Zones",
     "LegendEmpty": "None yet",
     "EditorTitle": "Hex {row}.{col}",

@@ -20,12 +20,63 @@
 import { MODULE_ID } from "./settings.js";
 import { normalizeHexContent } from "./data-model.js";
 import { palette } from "./render.js";
+import { TERRAIN_ZONES, zonePolygon, hexShapePoints } from "./geometry.js";
 
 let panelEl = null;
 let hooks = [];
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+const ZONE_KEY_RADIUS = 65;
+
 function colorHex(num) {
   return "#" + (Number(num) >>> 0).toString(16).padStart(6, "0");
+}
+
+function svgEl(tag, attrs = {}) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+  return el;
+}
+
+function centroid(points) {
+  const x = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+  const y = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+  return { x, y };
+}
+
+/** Static (non-interactive) reference diagram for the N1..N12/C1..C12
+ * addressing scheme itself - unlike the terrain/zone color lists below,
+ * this isn't scene-dependent (the numbering is fixed geometry, not data),
+ * so it's built once and reused across re-renders rather than rebuilt in
+ * render(). Bare numbers only (not the full "N7"/"C7" token) to fit the
+ * wedges at this size - the caption underneath says which ring is which. */
+function buildZoneKeyDiagram() {
+  const wrap = document.createElement("div");
+  wrap.className = "hc-legend-zonekey";
+
+  const svg = svgEl("svg", { viewBox: "-75 -70 150 140", class: "hc-legend-zonekey-svg" });
+  for (const card of TERRAIN_ZONES) {
+    const pts = zonePolygon(card, 0, 0, ZONE_KEY_RADIUS, { x: 0, y: 0 });
+    const flat = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    svg.appendChild(svgEl("polygon", { points: flat, class: card.startsWith("C") ? "hc-legend-zonekey-inner" : "hc-legend-zonekey-outer" }));
+    const { x, y } = centroid(pts);
+    const label = svgEl("text", { x: x.toFixed(1), y: y.toFixed(1), class: "hc-legend-zonekey-label" });
+    label.textContent = card.slice(1);
+    svg.appendChild(label);
+  }
+  svg.appendChild(svgEl("polygon", {
+    points: hexShapePoints(0, 0, ZONE_KEY_RADIUS, { x: 0, y: 0 }).map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "),
+    class: "hc-legend-zonekey-outline",
+    fill: "none",
+  }));
+  wrap.appendChild(svg);
+
+  const caption = document.createElement("p");
+  caption.className = "hc-legend-zonekey-caption";
+  caption.textContent = game.i18n.localize("HEXCHRON.LegendZoneKeyCaption");
+  wrap.appendChild(caption);
+
+  return wrap;
 }
 
 function computeUsage(scene) {
@@ -75,6 +126,10 @@ function render() {
   panelEl.append(terrainHeading, buildList(terrains, (swatch, type) => {
     swatch.style.background = colorHex(p.terrain[type] ?? p.terrain.unknown);
   }));
+
+  const zoneKeyHeading = document.createElement("h4");
+  zoneKeyHeading.textContent = game.i18n.localize("HEXCHRON.LegendZoneKey");
+  panelEl.append(zoneKeyHeading, buildZoneKeyDiagram());
 
   if (game.user.isGM && zones.length > 0) {
     const zoneHeading = document.createElement("h4");

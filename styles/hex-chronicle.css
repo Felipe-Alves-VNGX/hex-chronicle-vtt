@@ -400,7 +400,7 @@
   left: 92px;
   bottom: 8px;
   z-index: 20;
-  max-width: 180px;
+  max-width: 210px;
   max-height: 45vh;
   overflow-y: auto;
   background: rgba(20, 20, 18, 0.78);
@@ -453,6 +453,48 @@
   border-radius: 3px;
   flex: 0 0 auto;
   border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+#hex-chronicle-legend .hc-legend-zonekey {
+  text-align: center;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-svg {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-outer {
+  fill: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-inner {
+  fill: rgba(255, 255, 255, 0.14);
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-outline {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.5;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-label {
+  font-size: 7px;
+  fill: #f0f0f0;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  user-select: none;
+}
+
+#hex-chronicle-legend .hc-legend-zonekey-caption {
+  margin: 0.25rem 0 0;
+  font-size: 0.65rem;
+  opacity: 0.6;
 }
 
 #hex-chronicle-legend .hc-legend-zone-swatch {

@@ -289,6 +289,18 @@ também dobraram: de 6+`C` pra **12+`C`** pontos de ancoragem (`N1..N12` +
   erro nem sumiço, e a matemática das 4 peças ao redor de um mesmo corte
   angular (`N1`/`N12`/`C1`/`C12`) foi conferida ponto a ponto - batem
   exatamente, sem vão.
+- **Legenda ganhou um diagrama de referência das zonas** (`scripts/hex-legend.js`):
+  como `N1`/`C7` etc. não fazem sentido como uma lista de cor (são posição,
+  não categoria), a seção nova "Zone positions" desenha um hexágono estático
+  de 24 fatias numeradas (1-12 nos dois anéis, já que o anel entendido pela
+  posição radial dispensa repetir o prefixo `N`/`C`) usando a mesma
+  `zonePolygon()` do editor - não é interativa, só ajuda a decodificar uma
+  referência tipo "tem uma cova em C7" sem precisar abrir o editor completo.
+  Diferente da lista de "Zones" (secured/dangerous), essa seção é visível
+  pra todo mundo, GM ou jogador - é geometria fixa, não informação da
+  campanha. Testado ao vivo como GM e jogador: 24 polígonos com os rótulos
+  certos nos dois casos, "Zone positions" aparece pros dois enquanto "Zones"
+  continua GM-only.
 
 ## Limitações conhecidas (decisões deliberadas, não bugs)
 
