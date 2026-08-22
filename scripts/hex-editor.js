@@ -1,10 +1,13 @@
 /**
  * Per-hex content editor. ApplicationV2 form (FormApplication is deprecated
- * and slated for removal in Foundry v16 - see plan). Mixed terrain,
- * roads and rivers are edited as small line-based text fields rather than
- * a fully dynamic add/remove-row UI, to keep the v1 form simple:
+ * and slated for removal in Foundry v16 - see plan). Mixed terrain, roads
+ * and rivers each have a clickable diagram now (hex-diagram.js), but that's
+ * layered on top of - not instead of - the original line-based text
+ * fields, which stay reachable as a collapsed fallback:
  *
- *   mixedTerrain: "lake: C\nmarsh: SW"
+ *   mixedTerrain: "lake: C4\nmarsh: SW" (both the fine N1..N12/C1..C12
+ *     tokens the diagram paints with, and the original N/NE/SE/S/SW/NW/C
+ *     ones, work - see geometry.js/data-model.js)
  *   roads/rivers: "SW SE" (one path per line)
  *   zone: "secured, dangerous" (comma-separated)
  *

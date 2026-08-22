@@ -10,14 +10,28 @@
  * changing col/row bookkeeping.
  */
 
-export const CARDINALS = ["N", "NE", "SE", "S", "SW", "NW", "C"];
+/** 24 fine-grained terrain zones: N1..N12 form a ring of 12 wedges between
+ * the inner hexagon and the outer edge (each half the size of the old
+ * N/NE/SE/S/SW/NW trapezoids), C1..C12 form a matching ring of 12 triangles
+ * splitting what used to be the single "C" center hexagon. See
+ * ringPoints()/zonePolygon() below for the geometry. */
+export const TERRAIN_ZONES = [
+  "N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9", "N10", "N11", "N12",
+  "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12",
+];
 
-/** Zones valid for mixed-terrain sides / atomic zone composition. E and W are
- * vertex references only (used to build road/river Bezier anchors and the
- * outer hex shape) and are intentionally excluded here, matching the
- * original Cardinal.valid_zone behaviour. */
+/** Anchor points a road/river can start/end at: the same 12 ring positions
+ * as the outer terrain-zone wedges (N1..N12), plus the single true-center
+ * point C - a path doesn't need C split into 12 like a fill region does,
+ * since "touches the center" is already unambiguous as one point. */
+export const PATH_ANCHORS = ["N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9", "N10", "N11", "N12", "C"];
+
 export function isValidZone(token) {
-  return CARDINALS.includes(token);
+  return TERRAIN_ZONES.includes(token);
+}
+
+export function isValidPathAnchor(token) {
+  return PATH_ANCHORS.includes(token);
 }
 
 /** Normalizes a raw side/cardinal token: uppercases and maps the French
@@ -64,37 +78,6 @@ export function outerPoints(col, row, radius, origin) {
   };
 }
 
-export function innerPoints(col, row, radius, origin) {
-  const r = radius * 0.6;
-  const r2 = radius2FromRadius(radius) * 0.6;
-  const { x: cx, y: cy } = tileCenter(col, row, radius, origin);
-  return {
-    E: { x: round1(cx + r), y: round1(cy) },
-    NE: { x: round1(cx + r / 2), y: round1(cy - r2) },
-    NW: { x: round1(cx - r / 2), y: round1(cy - r2) },
-    W: { x: round1(cx - r), y: round1(cy) },
-    SW: { x: round1(cx - r / 2), y: round1(cy + r2) },
-    SE: { x: round1(cx + r / 2), y: round1(cy + r2) },
-  };
-}
-
-/** Path anchor points used for road/river Bezier curves: N, NE, SE, S, SW, NW
- * at full radius2 (30/60deg trig positions) plus C (center). */
-export function pathPoints(col, row, radius, origin) {
-  const radius2 = radius2FromRadius(radius);
-  const cosx = radius2 * 0.8660254; // cos(pi/6)
-  const { x: cx, y: cy } = tileCenter(col, row, radius, origin);
-  return {
-    N: { x: round1(cx), y: round1(cy - radius2) },
-    NW: { x: round1(cx - cosx), y: round1(cy - radius2 / 2) },
-    NE: { x: round1(cx + cosx), y: round1(cy - radius2 / 2) },
-    S: { x: round1(cx), y: round1(cy + radius2) },
-    SW: { x: round1(cx - cosx), y: round1(cy + radius2 / 2) },
-    SE: { x: round1(cx + cosx), y: round1(cy + radius2 / 2) },
-    C: { x: round1(cx), y: round1(cy) },
-  };
-}
-
 /** Outer hexagon vertices, in drawing order (matches the original Shapely
  * polygon: E, NE, NW, W, SW, SE). */
 export function hexShapePoints(col, row, radius, origin) {
@@ -102,29 +85,72 @@ export function hexShapePoints(col, row, radius, origin) {
   return [o.E, o.NE, o.NW, o.W, o.SW, o.SE];
 }
 
-/** Polygon (array of points) for one of the 7 zones of a hex: N/NE/SE/S/SW/NW
- * are quadrilaterals of 2 inner + 2 outer points; C is the inner hexagon. */
+// The inner hexagon's boundary sits at 60% of the outer radius - unchanged
+// from the original single "C" zone's size, just now subdivided.
+const INNER_SCALE = 0.6;
+
+/** The 12 points, 30deg apart, that bound the fine terrain-zone wedges and
+ * double as road/river anchors: odd positions (1,3,5,7,9,11) are the old
+ * N/NE/SE/S/SW/NW edge-midpoints (at radius2, the hexagon's apothem), even
+ * positions (2,4,6,8,10,12) are the hexagon's own vertices (at radius, E/NE/
+ * NW/W/SW/SE) - the two point sets this module already had, just
+ * interleaved into one ring instead of used separately. `scale` shrinks the
+ * whole ring toward the center: 1 for the outer zone ring's outer edge (and
+ * for road/river anchors, which always sit on the true outer edge), 0.6 for
+ * its inner edge (== the fine center ring's outer edge). Numeric 1..12 keys
+ * so zonePolygon()/fineRingPoints() below can index them positionally. */
+function ringPoints(col, row, radius, origin, scale) {
+  const { x: cx, y: cy } = tileCenter(col, row, radius, origin);
+  const r2 = radius2FromRadius(radius) * scale;
+  const r1 = radius * scale;
+  const cosx = r2 * 0.8660254; // cos(pi/6)
+  return {
+    1: { x: round1(cx), y: round1(cy - r2) }, // N
+    2: { x: round1(cx + r1 / 2), y: round1(cy - r2) }, // NE vertex
+    3: { x: round1(cx + cosx), y: round1(cy - r2 / 2) }, // NE
+    4: { x: round1(cx + r1), y: round1(cy) }, // E vertex
+    5: { x: round1(cx + cosx), y: round1(cy + r2 / 2) }, // SE
+    6: { x: round1(cx + r1 / 2), y: round1(cy + r2) }, // SE vertex
+    7: { x: round1(cx), y: round1(cy + r2) }, // S
+    8: { x: round1(cx - r1 / 2), y: round1(cy + r2) }, // SW vertex
+    9: { x: round1(cx - cosx), y: round1(cy + r2 / 2) }, // SW
+    10: { x: round1(cx - r1), y: round1(cy) }, // W vertex
+    11: { x: round1(cx - cosx), y: round1(cy - r2 / 2) }, // NW
+    12: { x: round1(cx - r1 / 2), y: round1(cy - r2) }, // NW vertex
+  };
+}
+
+/** Public, named version of ringPoints() at the outer edge (scale 1) -
+ * {N1: {x,y}, ..., N12: {x,y}} - the 12 road/river anchor points, and also
+ * what hex-diagram.js draws its clickable anchor circles at. */
+export function fineRingPoints(col, row, radius, origin) {
+  const pts = ringPoints(col, row, radius, origin, 1);
+  const named = {};
+  for (let k = 1; k <= 12; k++) named[`N${k}`] = pts[k];
+  return named;
+}
+
+/** Polygon for one of the 24 fine terrain zones (see TERRAIN_ZONES above):
+ * "N{k}" is the quadrilateral wedge between ring position k and k+1, from
+ * the inner hexagon boundary to the outer edge; "C{k}" is the matching
+ * triangular wedge from the true center out to the inner hexagon boundary
+ * at the same two ring positions - the same 12 angular cuts extended all
+ * the way in, so an outer and inner wedge sharing a number sit flush
+ * against each other with no gap or overlap. */
 export function zonePolygon(card, col, row, radius, origin) {
-  const inner = innerPoints(col, row, radius, origin);
-  const outer = outerPoints(col, row, radius, origin);
-  switch (card) {
-    case "N":
-      return [inner.NE, inner.NW, outer.NW, outer.NE];
-    case "NE":
-      return [inner.E, inner.NE, outer.NE, outer.E];
-    case "SE":
-      return [inner.E, inner.SE, outer.SE, outer.E];
-    case "S":
-      return [inner.SE, inner.SW, outer.SW, outer.SE];
-    case "SW":
-      return [inner.W, inner.SW, outer.SW, outer.W];
-    case "NW":
-      return [inner.W, inner.NW, outer.NW, outer.W];
-    case "C":
-      return [inner.E, inner.NE, inner.NW, inner.W, inner.SW, inner.SE];
-    default:
-      throw new Error(`No zone polygon for cardinal: ${card}`);
+  const outerMatch = /^N(\d{1,2})$/.exec(card);
+  const centerMatch = /^C(\d{1,2})$/.exec(card);
+  const k = Number((outerMatch ?? centerMatch)?.[1]);
+  if (!k || k < 1 || k > 12) throw new Error(`No zone polygon for cardinal: ${card}`);
+  const next = (k % 12) + 1;
+  const inner = ringPoints(col, row, radius, origin, INNER_SCALE);
+
+  if (outerMatch) {
+    const outer = ringPoints(col, row, radius, origin, 1);
+    return [inner[k], inner[next], outer[next], outer[k]];
   }
+  const { x, y } = tileCenter(col, row, radius, origin);
+  return [{ x, y }, inner[k], inner[next]];
 }
 
 /** Neighbor (col,row) for each of the 6 edge directions of a flat-top,

@@ -7,14 +7,22 @@
  * Markdown/YAML frontmatter field-for-field):
  *
  * {
- *   terrain: { type: "heavy_woods", mixed: [{ type: "lake", sides: ["C"] }] },
+ *   terrain: { type: "heavy_woods", mixed: [{ type: "lake", sides: ["C4", "C5"] }] },
  *   alt: "Some Text",
  *   icon: "fortin",
- *   roads: ["SW SE"],
- *   rivers: ["N S"],
+ *   roads: ["N9 N5"],
+ *   rivers: ["N1 N7"],
  *   zone: ["secured"],
  *   link: "JournalEntry.aBc123" | "Scene.xYz789" | "JournalEntry.aBc123.JournalEntryPage.dEf456",
  * }
+ *
+ * `sides`/road/river endpoints use the 24 fine terrain-zone tokens and 13
+ * path anchors from geometry.js (TERRAIN_ZONES/PATH_ANCHORS) - N1..N12 ring
+ * the hex's outer half, C1..C12 ring its center half, and paths anchor to
+ * N1..N12 or C. The original 7-token vocabulary (N/NE/SE/S/SW/NW/C) still
+ * reads correctly forever - normalizeSides()/normalizePath() below expand
+ * it to its fine equivalent on every read, no migration needed - but is no
+ * longer written by this module once a hex is resaved.
  *
  * `link` is a Foundry document UUID (see scripts/links.js) that the "Open
  * Link" tool resolves and opens - a Journal Entry, a specific page in one,
@@ -22,7 +30,41 @@
  * Foundry Note pin, but attached to the hex itself instead of a separate
  * canvas pin.
  */
-import { isValidZone, normalizeCardinal } from "./geometry.js";
+import { isValidZone, isValidPathAnchor, normalizeCardinal } from "./geometry.js";
+
+/** The original 7-token vocabulary (N/NE/SE/S/SW/NW/C), kept forever valid
+ * for reading - old hex data, hand-typed text, and imported files all still
+ * use it. Expanded transparently at normalize time into the fine-grained
+ * TERRAIN_ZONES tokens (geometry.js) that now back it, so nothing needs a
+ * one-time migration: every read re-expands, same as any other
+ * normalization this function already does. A coarse zone maps to the pair
+ * of fine wedges that together cover the exact same area (see
+ * geometry.js#zonePolygon's numbering); "C" maps to all 12 center wedges. */
+const LEGACY_ZONE_ALIASES = {
+  N: ["N12", "N1"],
+  NE: ["N2", "N3"],
+  SE: ["N4", "N5"],
+  S: ["N6", "N7"],
+  SW: ["N8", "N9"],
+  NW: ["N10", "N11"],
+  C: ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12"],
+};
+
+/** Same idea for a road/river endpoint - a legacy label maps to exactly one
+ * fine anchor point (a point doesn't need the pair-expansion a fill region
+ * does). "C" needs no aliasing - the single center point never changed. */
+const LEGACY_PATH_ALIASES = { N: "N1", NE: "N3", SE: "N5", S: "N7", SW: "N9", NW: "N11" };
+
+/** Expands one normalized zone token into the fine token(s) it represents -
+ * a no-op (wrapped in an array) for anything already fine-grained. */
+export function expandZoneToken(token) {
+  return LEGACY_ZONE_ALIASES[token] ?? [token];
+}
+
+/** Expands one normalized path-anchor token the same way, but 1:1. */
+export function expandPathToken(token) {
+  return LEGACY_PATH_ALIASES[token] ?? token;
+}
 
 export const TERRAIN_TYPES = [
   "plains",
@@ -44,25 +86,30 @@ export function emptyHex() {
 
 function normalizeSides(sides) {
   if (!Array.isArray(sides)) return [];
-  return sides
-    .map((s) => {
-      try {
-        return normalizeCardinal(s);
-      } catch {
-        return null;
-      }
-    })
-    .filter((s) => s && isValidZone(s));
+  const out = new Set();
+  for (const raw of sides) {
+    let token;
+    try {
+      token = normalizeCardinal(raw);
+    } catch {
+      continue;
+    }
+    for (const fine of expandZoneToken(token)) {
+      if (isValidZone(fine)) out.add(fine);
+    }
+  }
+  return [...out];
 }
 
 function normalizePath(entry) {
-  // "SW SE" -> "SW SE", tolerating extra whitespace and French aliases.
+  // "SW SE" -> "N9 N7", tolerating extra whitespace, French aliases, and
+  // the legacy 6-anchor vocabulary (expanded to its fine equivalent).
   if (typeof entry !== "string") return null;
   const tokens = entry.trim().split(/\s+/).filter(Boolean);
   if (tokens.length !== 2) return null;
   try {
-    const [a, b] = tokens.map(normalizeCardinal);
-    if (![a, b].every((t) => isValidZone(t) || t === "C")) return null;
+    const [a, b] = tokens.map(normalizeCardinal).map(expandPathToken);
+    if (![a, b].every(isValidPathAnchor)) return null;
     return `${a} ${b}`;
   } catch {
     return null;
@@ -114,7 +161,7 @@ export function stripStructure(content) {
  * the original priority: explicit building icon > center-zone terrain icon. */
 export function resolveIcon(content) {
   if (content.icon) return `building/${content.icon}`;
-  const centerTerrain = content.terrain.mixed.find((m) => m.sides.includes("C"));
+  const centerTerrain = content.terrain.mixed.find((m) => m.sides.some((s) => s.startsWith("C")));
   const terrainType = centerTerrain ? centerTerrain.type : content.terrain.type;
   return terrainType ? `terrain/${terrainType}` : null;
 }

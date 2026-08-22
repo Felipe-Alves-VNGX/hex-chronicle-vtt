@@ -12,7 +12,7 @@
  */
 import { MODULE_ID, getRadius, getOrigin, getPaletteOverride } from "./settings.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
-import { hexShapePoints, zonePolygon, pathPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
+import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
 import { getEffectiveContent } from "./fog.js";
 
@@ -235,7 +235,7 @@ function drawContent(container, col, row, radius, origin, content) {
     }
   }
 
-  const pp = pathPoints(col, row, radius, origin);
+  const pp = { ...fineRingPoints(col, row, radius, origin), C: tileCenter(col, row, radius, origin) };
   const strokeW = Math.max(1, (radius / 15) * 1.2);
   for (const road of content.roads) {
     const [a, b] = road.split(" ");
@@ -289,7 +289,7 @@ function drawContent(container, col, row, radius, origin, content) {
     marker.beginFill(LINK_MARKER_COLOR, 0.9);
     marker.drawCircle(0, 0, Math.max(3, radius * 0.08));
     marker.endFill();
-    marker.position.set(pp.SE.x, pp.SE.y);
+    marker.position.set(pp.N5.x, pp.N5.y); // same corner the old pathPoints.SE sat at
     container.addChild(marker);
   }
 }

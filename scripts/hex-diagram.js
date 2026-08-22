@@ -1,24 +1,27 @@
 /**
  * Visual replacement for the hex editor's mixed-terrain/roads/rivers text
- * fields: a small clickable SVG diagram of one hexagon (the same 7 zones -
- * N/NE/SE/S/SW/NW/C - and 7 path anchors the canvas renderer itself draws
- * from, via the same pure geometry helpers). Interacting with the diagram
- * just writes the equivalent text into the existing textarea, so submission
- * (hex-editor.js's #onSubmit) and storage (data-model.js's
+ * fields: a small clickable SVG diagram of one hexagon (the same 24
+ * fine-grained terrain zones and 13 path anchors the canvas renderer itself
+ * draws from, via the same pure geometry helpers). Interacting with the
+ * diagram just writes the equivalent text into the existing textarea, so
+ * submission (hex-editor.js's #onSubmit) and storage (data-model.js's
  * normalizeHexContent) never had to change - this is purely a friendlier
  * input method for the same field.
  *
  * The raw textarea stays reachable (see the <details> wrapper in
  * hex-editor.hbs) as a fallback for hand-editing or pasting, and both
  * directions stay in sync: painting/drawing updates the textarea, and
- * typing in the textarea re-parses and redraws the diagram.
+ * typing in the textarea re-parses and redraws the diagram. Legacy 7-token
+ * text (N/NE/SE/S/SW/NW/C) parses fine too - expandZoneToken()/
+ * expandPathToken() (data-model.js) expand it to the fine tokens the
+ * diagram actually paints, same as normalizeHexContent does on save.
  */
-import { CARDINALS, zonePolygon, pathPoints, hexShapePoints, normalizeCardinal, isValidZone } from "./geometry.js";
-import { TERRAIN_TYPES } from "./data-model.js";
+import { TERRAIN_ZONES, PATH_ANCHORS, zonePolygon, fineRingPoints, hexShapePoints, normalizeCardinal, isValidZone, isValidPathAnchor } from "./geometry.js";
+import { TERRAIN_TYPES, expandZoneToken, expandPathToken } from "./data-model.js";
 import { palette } from "./render.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const DISPLAY_RADIUS = 90;
+const DISPLAY_RADIUS = 110;
 const ORIGIN = { x: 0, y: 0 };
 
 function svgEl(tag, attrs = {}) {
@@ -35,7 +38,9 @@ function colorHex(num) {
   return "#" + (Number(num) >>> 0).toString(16).padStart(6, "0");
 }
 
-/** "type: side1 side2\n..." -> {cardinal: type}, last write per side wins. */
+/** "type: side1 side2\n..." -> {cardinal: type}, last write per side wins.
+ * Legacy tokens (N, C, ...) expand to their fine equivalent, same as
+ * data-model.js's normalizeSides(). */
 export function textToZoneMap(text) {
   const map = {};
   for (const rawLine of (text ?? "").split("\n")) {
@@ -51,34 +56,37 @@ export function textToZoneMap(text) {
       } catch {
         continue;
       }
-      if (isValidZone(side)) map[side] = type;
+      for (const fine of expandZoneToken(side)) {
+        if (isValidZone(fine)) map[fine] = type;
+      }
     }
   }
   return map;
 }
 
-/** Inverse of textToZoneMap(): groups cardinals sharing a type into one
- * line each, in a stable N/NE/SE/S/SW/NW/C scan order. */
+/** Inverse of textToZoneMap(): groups zones sharing a type into one line
+ * each, in a stable N1..N12/C1..C12 scan order. */
 export function zoneMapToText(map) {
   const byType = new Map();
-  for (const card of CARDINALS) {
-    const type = map[card];
+  for (const zone of TERRAIN_ZONES) {
+    const type = map[zone];
     if (!type) continue;
     if (!byType.has(type)) byType.set(type, []);
-    byType.get(type).push(card);
+    byType.get(type).push(zone);
   }
   return [...byType.entries()].map(([type, sides]) => `${type}: ${sides.join(" ")}`).join("\n");
 }
 
-/** "A B\n..." -> [[a,b], ...] */
+/** "A B\n..." -> [[a,b], ...]. Legacy anchor labels expand the same way
+ * data-model.js's normalizePath() does. */
 export function textToPaths(text) {
   const paths = [];
   for (const rawLine of (text ?? "").split("\n")) {
     const tokens = rawLine.trim().split(/\s+/).filter(Boolean);
     if (tokens.length !== 2) continue;
     try {
-      const [a, b] = tokens.map(normalizeCardinal);
-      if (isValidZone(a) && isValidZone(b)) paths.push([a, b]);
+      const [a, b] = tokens.map(normalizeCardinal).map(expandPathToken);
+      if (isValidPathAnchor(a) && isValidPathAnchor(b)) paths.push([a, b]);
     } catch {
       /* malformed line - skip, matches the tolerant submit-time parser */
     }
@@ -101,9 +109,9 @@ export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
   const wrap = document.createElement("div");
   wrap.className = "hc-terrain-diagram";
 
-  const svg = svgEl("svg", { viewBox: "-100 -95 200 190", class: "hc-hex-svg" });
+  const svg = svgEl("svg", { viewBox: "-125 -110 250 220", class: "hc-hex-svg" });
   const polysByCard = {};
-  for (const card of CARDINALS) {
+  for (const card of TERRAIN_ZONES) {
     const poly = svgEl("polygon", {
       points: pointsAttr(zonePolygon(card, 0, 0, DISPLAY_RADIUS, ORIGIN)),
       class: "hc-zone",
@@ -163,7 +171,7 @@ export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
 
   function redraw() {
     const baseType = terrainTypeSelect.value;
-    for (const card of CARDINALS) {
+    for (const card of TERRAIN_ZONES) {
       const poly = polysByCard[card];
       const type = zoneMap[card];
       if (type) {
@@ -200,7 +208,7 @@ export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
 /** Mounts the roads/rivers path editor into `root`. Click two anchors in
  * sequence to add a path between them; click an already-drawn path to
  * remove it. A small mode toggle switches which of the two textareas is
- * being edited (they share one diagram - roads and rivers use the same 7
+ * being edited (they share one diagram - roads and rivers use the same 13
  * anchors, just drawn/stored separately). */
 export function attachPathDiagram(root, { roadsTextarea, riversTextarea }) {
   let roads = textToPaths(roadsTextarea.value);
@@ -208,7 +216,7 @@ export function attachPathDiagram(root, { roadsTextarea, riversTextarea }) {
   let mode = "roads";
   let pending = null;
 
-  const pts = pathPoints(0, 0, DISPLAY_RADIUS, ORIGIN);
+  const pts = { ...fineRingPoints(0, 0, DISPLAY_RADIUS, ORIGIN), C: { x: 0, y: 0 } };
 
   const wrap = document.createElement("div");
   wrap.className = "hc-path-diagram";
@@ -227,7 +235,7 @@ export function attachPathDiagram(root, { roadsTextarea, riversTextarea }) {
   riverBtn.addEventListener("click", () => setMode("rivers"));
   modeRow.append(roadBtn, riverBtn);
 
-  const svg = svgEl("svg", { viewBox: "-100 -95 200 190", class: "hc-hex-svg" });
+  const svg = svgEl("svg", { viewBox: "-125 -110 250 220", class: "hc-hex-svg" });
   svg.appendChild(svgEl("polygon", { points: pointsAttr(hexShapePoints(0, 0, DISPLAY_RADIUS, ORIGIN)), class: "hc-hex-outline-faint", fill: "none" }));
 
   const pathsLayer = svgEl("g", { class: "hc-paths-layer" });
@@ -235,9 +243,9 @@ export function attachPathDiagram(root, { roadsTextarea, riversTextarea }) {
   svg.append(pathsLayer, anchorsLayer);
 
   const anchorEls = {};
-  for (const card of CARDINALS) {
+  for (const card of PATH_ANCHORS) {
     const p = pts[card];
-    const circle = svgEl("circle", { cx: p.x, cy: p.y, r: card === "C" ? 7 : 6, class: "hc-anchor", "data-tooltip": card });
+    const circle = svgEl("circle", { cx: p.x, cy: p.y, r: card === "C" ? 7 : 5, class: "hc-anchor", "data-tooltip": card });
     circle.addEventListener("click", () => onAnchorClick(card));
     anchorEls[card] = circle;
     anchorsLayer.appendChild(circle);

@@ -246,6 +246,50 @@ tocar na cena compartilhada). Também sem bugs novos:
   por engano (o clique normal fica suprimido enquanto há um arraste em
   andamento). Botão ausente pra jogador não-GM.
 
+### Subdivisão fina de zonas de terreno (7 → 24 + 13 âncoras)
+Pedido do usuário: mais nuance espacial dentro de um hexágono. As 7 zonas
+originais (`N`/`NE`/`SE`/`S`/`SW`/`NW`/`C`) viraram **24 zonas finas**
+numeradas - `N1..N12` (anel externo, cada uma metade do tamanho dos antigos
+trapézios) e `C1..C12` (o antigo hexágono `C` único, agora dividido nos
+mesmos 12 cortes angulares que o anel externo usa, então uma peça `N{k}` e
+sua correspondente `C{k}` ficam perfeitamente coladas, sem vão nem
+sobreposição - confirmado por inspeção direta das coordenadas). Estradas/rios
+também dobraram: de 6+`C` pra **12+`C`** pontos de ancoragem (`N1..N12` +
+`C`), usando as mesmas 12 posições angulares.
+
+- **Geometria** (`scripts/geometry.js`): os 12 pontos de cada anel
+  intercalam o que já existia em dois lugares diferentes do código - os 6
+  pontos médios de aresta (`N`/`NE`/`SE`/`S`/`SW`/`NW`, antigo `pathPoints`)
+  e os 6 vértices do hexágono (`E`/`NE`/`NW`/`W`/`SW`/`SE`, `outerPoints`) -
+  intercalados a cada 30° em vez de usados separadamente. `zonePolygon()`
+  agora calcula os quadriláteros `N{k}` e os triângulos `C{k}` a partir
+  dessa única função `ringPoints()` (privada; `fineRingPoints()` é a versão
+  pública nomeada, usada tanto pelo render quanto pelo diagrama visual).
+- **Compatibilidade total, sem migração**: os 7 tokens antigos continuam
+  válidos pra sempre - `normalizeSides()`/`normalizePath()`
+  (`data-model.js`) expandem cada um pro(s) token(s) fino(s) equivalente(s)
+  toda vez que o dado é lido (`N` → `{N12,N1}`, `C` → todos os 12 `C{k}`,
+  pontos de estrada `NW` → `N11`, etc.) - já que essa expansão acontece
+  dentro de `normalizeHexContent()`, que já era chamada em todo lugar que
+  lê um hex, hexágonos salvos antes dessa mudança continuam renderizando
+  idêntico sem precisar resalvar nada. Uma vez resalvo (pelo editor ou
+  import), o hex passa a guardar os tokens finos.
+- **Achado ao testar ao vivo**: `render.js` montava os pontos de
+  estrada/rio com o antigo `pathPoints()` (só 7 chaves) - se eu só tivesse
+  trocado a validação sem atualizar esse `pp[a]`/`pp[b]`, toda estrada/rio
+  salva com token fino teria simplesmente sumido do mapa (`if (!pp[a] ||
+  !pp[b]) continue`, uma falha silenciosa). Corrigido trocando pro mesmo
+  `fineRingPoints()` que o diagrama usa - inclusive o marcador de link, que
+  usava `pp.SE` (agora `pp.N5`, o mesmo canto).
+- Testado ao vivo como GM, num hex real com dado legado (`hills: N`) e um
+  hex de teste descartável: o diagrama carrega e pinta certo as 2 peças
+  finas correspondentes a um token antigo salvo há sessões atrás, dá pra
+  pintar/desenhar com os tokens novos e salvar, um hex antigo com rios em
+  letras antigas (`C NW`, `NW N`, ...) continua desenhando na cena sem
+  erro nem sumiço, e a matemática das 4 peças ao redor de um mesmo corte
+  angular (`N1`/`N12`/`C1`/`C12`) foi conferida ponto a ponto - batem
+  exatamente, sem vão.
+
 ## Limitações conhecidas (decisões deliberadas, não bugs)
 
 - **Sigilo é "suave", não real**: o conteúdo de hexágonos não explorados

@@ -35,7 +35,7 @@
     "OpenLink": "Open",
     "FieldTerrainType": "Terrain",
     "FieldMixedTerrain": "Mixed terrain",
-    "FieldMixedTerrainHint": "One override per line: \"type: side1 side2\" (sides: N, NE, SE, S, SW, NW, C).",
+    "FieldMixedTerrainHint": "One override per line: \"type: side1 side2\" - sides are N1..N12 (outer ring) or C1..C12 (center ring), see the diagram above. The old N/NE/SE/S/SW/NW/C labels still work too.",
     "TerrainDiagramHint": "Pick a terrain below, then click zones on the hex to paint them. Click a painted zone again to clear it.",
     "TerrainBrushEraser": "Clear zone",
     "PathDiagramHint": "Click two points on the hex to draw a path between them. Click an existing path to remove it.",
