@@ -20,6 +20,7 @@ import { normalizeHexContent, hexKey, TERRAIN_TYPES } from "./data-model.js";
 import { isStructureRevealed, setStructureRevealed } from "./fog.js";
 import { openHexLink } from "./links.js";
 import { attachTerrainDiagram, attachPathDiagram } from "./hex-diagram.js";
+import { attachIconPicker } from "./hex-icon-picker.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -108,6 +109,12 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const riversField = this.element.querySelector('textarea[name="rivers"]');
     if (pathDiagramRoot && roadsField && riversField) {
       attachPathDiagram(pathDiagramRoot, { roadsTextarea: roadsField, riversTextarea: riversField });
+    }
+
+    const iconPickerRoot = this.element.querySelector(".hc-icon-picker-root");
+    const iconInput = this.element.querySelector('input[name="icon"]');
+    if (iconPickerRoot && iconInput) {
+      attachIconPicker(iconPickerRoot, { input: iconInput });
     }
 
     const linkInput = this.element.querySelector('input[name="link"]');

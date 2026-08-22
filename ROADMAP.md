@@ -89,11 +89,13 @@ tocar na cena compartilhada). Também sem bugs novos:
   externo (19 pontos) e o contorno interno do buraco (7 pontos, do hex que
   fica de fora da zona) - confirmando o caso descrito no comentário do
   arquivo.
-- **Ícone quebrado não derruba o mapa**: importar hexes com `icon` de
-  nomes que não existem nos assets do módulo (ex.: `ruines`, `capitale`)
-  gerou 404 + `console.warn` (`icon not found: ...`), mas o resto da cena
-  renderizou normalmente - confirma a proteção contra crash já registrada
-  acima.
+- **Ícone quebrado não derruba o mapa**: importar um hex com `icon`
+  apontando pra um nome inexistente gerou 404 + `console.warn`
+  (`icon not found: ...`), mas o resto da cena renderizou normalmente -
+  confirma a proteção contra crash já registrada acima. (Nota: os nomes
+  citados numa versão anterior desta entrada - `ruines`, `capitale` - na
+  verdade existem em `assets/icons/building/`; foi outro nome inventado no
+  teste que gerou o 404, não esses.)
 - **Grade inicial em cena vazia**: cena nova sem nenhum hex gravado
   desenhou exatamente 37 células (anel de raio 3), centradas no hex mais
   próximo do centro real da cena (`scene.width/2, scene.height/2`), não em
@@ -164,15 +166,23 @@ tocar na cena compartilhada). Também sem bugs novos:
   camada. Testado ao vivo como GM: botão só aparece pro GM, cancelar não
   mexe em nada, confirmar zera o flag `explored` inteiro e dispara a
   notificação de sucesso.
+- **Seletor visual de ícone** (`scripts/hex-icon-picker.js`): o campo
+  "Building icon" ganhou uma grade com preview real dos 14 ícones que o
+  módulo já traz em `assets/icons/building/` (mais um botão "Nenhum"), em
+  vez de precisar digitar o nome do arquivo de cor. O campo de texto
+  continua visível e editável do lado - útil pra um ícone customizado que
+  não esteja na lista - com sincronia nos dois sentidos (clicar atualiza o
+  texto, digitar atualiza qual ícone aparece selecionado; clicar de novo no
+  já selecionado limpa). Mesmo padrão dos outros widgets: só escreve no
+  `<input name="icon">` que já existia, então nada mudou na submissão nem
+  no storage. Testado ao vivo como GM: as 14 imagens carregam sem 404,
+  clique/toggle/digitação sincronizam certo, e um submit completo salva o
+  ícone escolhido.
 
 ## Em aberto / próximos passos
 
 Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
 aproximadamente por esforço/impacto.
-
-### Ganhos rápidos
-- **Seletor visual de ícone** com preview (em vez de digitar o nome do arquivo
-  de cor).
 
 ### Para mapas grandes
 - **Buscar/ir para hexágono por coordenada.**

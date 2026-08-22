@@ -29,6 +29,7 @@
     "PathRemoveHint": "Click to remove",
     "RawTextToggle": "Edit as text",
     "FieldIcon": "Building icon",
+    "IconNone": "No icon",
     "FieldAlt": "Label (shown if no icon)",
     "FieldRoads": "Roads",
     "FieldRivers": "Rivers",

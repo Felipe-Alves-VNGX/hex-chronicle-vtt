@@ -244,3 +244,41 @@
   width: 100%;
   margin-bottom: 0.3rem;
 }
+
+/* --- Visual building-icon picker --- */
+
+.hex-chronicle-editor .hc-icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.hex-chronicle-editor .hc-icon-swatch {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background: #e8e4da;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.hex-chronicle-editor .hc-icon-swatch img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hex-chronicle-editor .hc-icon-swatch.active {
+  border-color: var(--color-border-highlight, #ff6400);
+}
+
+.hex-chronicle-editor .hc-icon-swatch.hc-icon-none {
+  color: #333;
+  font-size: 0.9rem;
+}
