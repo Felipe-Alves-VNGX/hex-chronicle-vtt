@@ -3,6 +3,7 @@ import { HexChronicleLayer } from "./layer.js";
 import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
 import { HexDirectory } from "./hex-directory.js";
+import { toggleLegend } from "./hex-legend.js";
 
 // Singleton so repeated clicks on the toolbar button re-focus the same
 // window instead of stacking up duplicates.
@@ -103,6 +104,17 @@ Hooks.on("getSceneControlButtons", (controls) => {
             hexDirectoryApp.render(true);
           }
         },
+      },
+      legend: {
+        name: "legend",
+        title: "HEXCHRON.ToolLegend",
+        icon: "fa-solid fa-swatchbook",
+        toggle: true,
+        active: false,
+        // Visible to everyone - the panel itself only shows zones to the GM
+        // (see hex-legend.js), but the terrain color key is useful for
+        // players reading the map too.
+        onChange: (event, active) => toggleLegend(active),
       },
     },
   };

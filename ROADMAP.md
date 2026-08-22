@@ -198,14 +198,28 @@ tocar na cena compartilhada). Também sem bugs novos:
   uma edição reflete na lista sem eu chamar nada manualmente, fechar a
   janela realmente para de escutar (editar depois não reabre nem erra), e
   o botão não aparece pra um jogador não-GM.
+- **Legenda de terreno/zona na tela** (`scripts/hex-legend.js`): novo botão
+  liga/desliga (`fa-swatchbook`) no grupo Hex Chronicle, visível pra todo
+  mundo. Mostra só o que a cena atual realmente usa - não a paleta inteira
+  do módulo - com as mesmas cores de `render.js#palette()`. Zonas só
+  aparecem pro GM (mesma regra do mapa: contorno de zona nunca é desenhado
+  pra não-GM). Não é uma janela ApplicationV2, é um painel HTML simples
+  fixado num canto (`position:fixed`, canto inferior esquerdo, entre a
+  barra de ferramentas e a hotbar - único espaço livre no layout padrão do
+  v13). Também "dinâmico": reconstrói sozinho em `updateScene`/`canvasReady`
+  enquanto estiver visível. Achado ao testar ao vivo: um único clique no
+  botão dispara `onChange` 2-3 vezes seguidas com o mesmo valor de `active`
+  (some quirk do scene-controls/Carolingian UI, não é nada que este módulo
+  controle) - `showLegend()`/`hideLegend()` precisaram ser idempotentes por
+  causa disso. Testado como GM e jogador: jogador só vê a seção de terreno,
+  GM vê terreno+zonas, o estado liga/desliga sobrevive a trocar de grupo de
+  ferramentas e voltar, e o toggle funciona nos dois sentidos via clique
+  real no botão.
 
 ## Em aberto / próximos passos
 
 Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
 aproximadamente por esforço/impacto.
-
-### Para mapas grandes
-- **Legenda de terreno/zona** visível na tela.
 
 ### Para overlay em arte customizada
 - **Alça de arrastar** pra reposicionar/escalar a grade visualmente sobre uma

@@ -392,3 +392,71 @@
   font-size: 0.85rem;
   padding: 1.5rem 0;
 }
+
+/* --- On-screen terrain/zone legend --- */
+
+#hex-chronicle-legend {
+  position: fixed;
+  left: 92px;
+  bottom: 8px;
+  z-index: 20;
+  max-width: 180px;
+  max-height: 45vh;
+  overflow-y: auto;
+  background: rgba(20, 20, 18, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  color: #f0f0f0;
+  font-family: var(--font-primary, sans-serif);
+  pointer-events: auto;
+}
+
+#hex-chronicle-legend h4 {
+  margin: 0.4rem 0 0.2rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+#hex-chronicle-legend h4:first-child {
+  margin-top: 0;
+}
+
+#hex-chronicle-legend .hc-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+#hex-chronicle-legend .hc-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+#hex-chronicle-legend .hc-legend-empty {
+  opacity: 0.5;
+  font-style: italic;
+  text-transform: none;
+}
+
+#hex-chronicle-legend .hc-legend-swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+#hex-chronicle-legend .hc-legend-zone-swatch {
+  background: transparent;
+  border-width: 2px;
+  border-style: dashed;
+}
