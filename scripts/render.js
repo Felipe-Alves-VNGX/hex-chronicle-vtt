@@ -56,7 +56,11 @@ const RIVER_COLOR = 0x3a7ca5;
 
 const textureCache = new Map();
 
-function palette() {
+/** Exposed so the hex editor's visual terrain-brush diagram (hex-diagram.js)
+ * paints with the exact same colors (including any world palette override)
+ * as the actual map render - keeps the picker WYSIWYG instead of drifting
+ * out of sync with a second hardcoded color list. */
+export function palette() {
   const override = getPaletteOverride();
   return {
     terrain: { ...DEFAULT_TERRAIN_COLORS, ...(override.terrain ?? {}) },

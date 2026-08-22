@@ -110,6 +110,31 @@ tocar na cena compartilhada). Também sem bugs novos:
 - Grade mais fina e translúcida, números de coordenada menores e discretos.
 - Formulário do editor reorganizado em seções (`fieldset`) com ícones:
   Terreno, Estrutura, Estradas & Rios, Zonas & Links.
+- **Editor visual de terreno misto/estradas/rios** (`scripts/hex-diagram.js`):
+  as duas caixas de texto (`lake: C`, `SW SE`) viraram um mini-diagrama SVG
+  clicável do hexágono, construído com a mesma geometria pura que o canvas
+  usa (`zonePolygon`/`pathPoints` de `geometry.js`), então o resultado é
+  visualmente idêntico ao mapa real - inclusive a paleta de cores, puxada de
+  `render.js#palette()` (já respeita `paletteOverride`).
+  - **Terreno misto**: 7 zonas clicáveis (N/NE/SE/S/SW/NW/C); escolhe um
+    "pincel" de terreno na paleta de amostras e clica pra pintar, clica de
+    novo com o mesmo pincel pra limpar. Zonas sem override mostram um tom
+    fraco da cor do terreno-base (atualiza ao vivo se o `<select>` de
+    terreno mudar).
+  - **Estradas/Rios**: clica em dois pontos cardeais em sequência pra
+    desenhar um caminho entre eles (curva através do centro, igual ao
+    render real); clica num caminho já desenhado pra removê-lo. Um alternador
+    troca entre editar estradas e rios no mesmo diagrama.
+  - O textarea original continua existindo dentro de um `<details>`
+    recolhido ("Edit as text") como via de escape para dados legados/edição
+    manual - editar o texto ali re-sincroniza o diagrama ao vivo, e vice-versa.
+  - Nada mudou no formato salvo: o diagrama só escreve no mesmo textarea que
+    o `#onSubmit` já lia, então `normalizeHexContent`/storage ficaram
+    intocados. Testado ao vivo como GM: carregamento de hex existente
+    (`hills: N` pré-pintado certo), pintar/apagar/toggle, sincronia
+    bidirecional com o texto bruto, desenhar+remover estrada e rio
+    independentemente, e um submit completo salvando exatamente o que o
+    diagrama montou.
 
 ## Em aberto / próximos passos
 
@@ -123,11 +148,6 @@ aproximadamente por esforço/impacto.
   existe em `fog.js` mas não está ligada a nenhum botão/ferramenta ainda.
 - **Seletor visual de ícone** com preview (em vez de digitar o nome do arquivo
   de cor).
-
-### Mudança de maior impacto
-- **Editor visual de terreno misto/estradas/rios**: um mini-diagrama clicável
-  do hexágono (as 7 zonas + pontos cardeais) no lugar da sintaxe de texto
-  atual (`lake: C`, `SW SE`).
 
 ### Para mapas grandes
 - **Buscar/ir para hexágono por coordenada.**

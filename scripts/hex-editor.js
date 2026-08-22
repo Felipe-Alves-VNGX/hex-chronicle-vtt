@@ -19,6 +19,7 @@ import { MODULE_ID } from "./settings.js";
 import { normalizeHexContent, hexKey, TERRAIN_TYPES } from "./data-model.js";
 import { isStructureRevealed, setStructureRevealed } from "./fog.js";
 import { openHexLink } from "./links.js";
+import { attachTerrainDiagram, attachPathDiagram } from "./hex-diagram.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -88,6 +89,20 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _onRender(context, options) {
     await super._onRender(context, options);
+
+    const terrainDiagramRoot = this.element.querySelector(".hc-terrain-diagram-root");
+    const terrainTypeSelect = this.element.querySelector('select[name="terrainType"]');
+    const mixedTerrainField = this.element.querySelector('textarea[name="mixedTerrain"]');
+    if (terrainDiagramRoot && terrainTypeSelect && mixedTerrainField) {
+      attachTerrainDiagram(terrainDiagramRoot, { textarea: mixedTerrainField, terrainTypeSelect });
+    }
+
+    const pathDiagramRoot = this.element.querySelector(".hc-path-diagram-root");
+    const roadsField = this.element.querySelector('textarea[name="roads"]');
+    const riversField = this.element.querySelector('textarea[name="rivers"]');
+    if (pathDiagramRoot && roadsField && riversField) {
+      attachPathDiagram(pathDiagramRoot, { roadsTextarea: roadsField, riversTextarea: riversField });
+    }
 
     const linkInput = this.element.querySelector('input[name="link"]');
     if (linkInput) {

@@ -99,3 +99,139 @@
 .hex-chronicle-editor .form-fields input {
   flex: 1;
 }
+
+/* --- Visual mixed-terrain / roads-rivers diagrams --- */
+
+.hex-chronicle-editor .hc-hex-svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.hex-chronicle-editor .hc-zone {
+  stroke: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.35));
+  stroke-width: 1;
+  cursor: pointer;
+  transition: filter 0.1s ease;
+}
+
+.hex-chronicle-editor .hc-zone:hover {
+  filter: brightness(1.25);
+  stroke: var(--color-border-highlight, #ff6400);
+}
+
+.hex-chronicle-editor .hc-hex-outline {
+  stroke: var(--color-border-dark, #000);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.hex-chronicle-editor .hc-hex-outline-faint {
+  stroke: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.35));
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+.hex-chronicle-editor .hc-brush-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+  margin: 0.5rem 0 0.15rem;
+}
+
+.hex-chronicle-editor .hc-brush-swatch {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background: var(--hc-swatch-color, #888);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.hex-chronicle-editor .hc-brush-swatch.active {
+  border-color: var(--color-border-highlight, #ff6400);
+}
+
+.hex-chronicle-editor .hc-brush-swatch.hc-brush-eraser {
+  background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 8px 8px;
+  color: var(--color-text-light-highlight, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.hex-chronicle-editor .hc-path-mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.hex-chronicle-editor .hc-path-mode-btn {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hex-chronicle-editor .hc-path-mode-btn.active {
+  background: var(--color-border-highlight, #ff6400);
+  color: #fff;
+}
+
+.hex-chronicle-editor .hc-anchor {
+  fill: var(--color-text-light-highlight, #e6e6e6);
+  stroke: var(--color-border-dark, #000);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: r 0.1s ease;
+}
+
+.hex-chronicle-editor .hc-anchor:hover {
+  fill: var(--color-border-highlight, #ff6400);
+}
+
+.hex-chronicle-editor .hc-anchor.pending {
+  fill: var(--color-border-highlight, #ff6400);
+  stroke-width: 2;
+}
+
+.hex-chronicle-editor .hc-path-line {
+  stroke-width: 5;
+  cursor: pointer;
+}
+
+.hex-chronicle-editor .hc-path-line:hover {
+  stroke: #e63946 !important;
+}
+
+.hex-chronicle-editor .hc-road-line {
+  stroke: #8b5a2b;
+}
+
+.hex-chronicle-editor .hc-river-line {
+  stroke: #3a7ca5;
+}
+
+.hex-chronicle-editor .hc-raw-toggle {
+  margin-top: 0.4rem;
+}
+
+.hex-chronicle-editor .hc-raw-toggle summary {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.hex-chronicle-editor .hc-raw-toggle textarea {
+  width: 100%;
+  margin-bottom: 0.3rem;
+}

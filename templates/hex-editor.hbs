@@ -13,8 +13,13 @@
 
     <div class="form-group stacked">
       <label>{{localize "HEXCHRON.FieldMixedTerrain"}}</label>
-      <textarea name="mixedTerrain" rows="3" placeholder="lake: C&#10;marsh: SW">{{mixedTerrain}}</textarea>
-      <p class="hint">{{localize "HEXCHRON.FieldMixedTerrainHint"}}</p>
+      <p class="hint">{{localize "HEXCHRON.TerrainDiagramHint"}}</p>
+      <div class="hc-terrain-diagram-root"></div>
+      <details class="hc-raw-toggle">
+        <summary>{{localize "HEXCHRON.RawTextToggle"}}</summary>
+        <textarea name="mixedTerrain" rows="3" placeholder="lake: C&#10;marsh: SW">{{mixedTerrain}}</textarea>
+        <p class="hint">{{localize "HEXCHRON.FieldMixedTerrainHint"}}</p>
+      </details>
     </div>
   </fieldset>
 
@@ -42,13 +47,15 @@
     <legend><i class="fa-solid fa-route"></i> {{localize "HEXCHRON.SectionPaths"}}</legend>
 
     <div class="form-group stacked">
-      <label>{{localize "HEXCHRON.FieldRoads"}}</label>
-      <textarea name="roads" rows="2" placeholder="SW SE">{{roads}}</textarea>
-    </div>
-
-    <div class="form-group stacked">
-      <label>{{localize "HEXCHRON.FieldRivers"}}</label>
-      <textarea name="rivers" rows="2" placeholder="N S">{{rivers}}</textarea>
+      <p class="hint">{{localize "HEXCHRON.PathDiagramHint"}}</p>
+      <div class="hc-path-diagram-root"></div>
+      <details class="hc-raw-toggle">
+        <summary>{{localize "HEXCHRON.RawTextToggle"}}</summary>
+        <label>{{localize "HEXCHRON.FieldRoads"}}</label>
+        <textarea name="roads" rows="2" placeholder="SW SE">{{roads}}</textarea>
+        <label>{{localize "HEXCHRON.FieldRivers"}}</label>
+        <textarea name="rivers" rows="2" placeholder="N S">{{rivers}}</textarea>
+      </details>
     </div>
   </fieldset>
 
