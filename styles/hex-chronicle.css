@@ -1,3 +1,12 @@
+/* contentClasses puts "hex-chronicle-editor" directly on .window-content -
+   Foundry doesn't make that scrollable by default, so with the terrain/
+   roads/rivers diagrams (hex-diagram.js) pushing the form past most screens'
+   height, everything below the fold (Save button included) was clipped and
+   unreachable instead of scrolling into view. */
+.hex-chronicle-editor.window-content {
+  overflow-y: auto;
+}
+
 .hex-chronicle-editor .hex-chronicle-hint {
   font-size: 0.8rem;
   opacity: 0.7;

@@ -49,13 +49,19 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: "hex-chronicle-editor",
     tag: "form",
-    window: { title: "HEXCHRON.EditorTitle", contentClasses: ["hex-chronicle-editor"] },
-    position: { width: 420 },
+    window: { title: "HEXCHRON.EditorTitle", contentClasses: ["hex-chronicle-editor"], resizable: true },
+    position: { width: 420, height: 680 },
     form: { handler: HexEditor.#onSubmit, submitOnChange: false, closeOnSubmit: true },
   };
 
   static PARTS = {
-    form: { template: `modules/${MODULE_ID}/templates/hex-editor.hbs` },
+    // "" (the part's own root element, i.e. .window-content itself) is what
+    // needs to scroll now that the terrain/roads/rivers diagrams (see
+    // hex-diagram.js) made the form taller than a lot of screens - without
+    // this Foundry leaves overflow-y:hidden on window-content by default,
+    // silently clipping everything below the fold (Save button included,
+    // confirmed live) instead of scrolling to it.
+    form: { template: `modules/${MODULE_ID}/templates/hex-editor.hbs`, scrollable: [""] },
   };
 
   get title() {
