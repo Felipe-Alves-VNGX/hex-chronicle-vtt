@@ -135,6 +135,27 @@ tocar na cena compartilhada). Também sem bugs novos:
     bidirecional com o texto bruto, desenhar+remover estrada e rio
     independentemente, e um submit completo salvando exatamente o que o
     diagrama montou.
+- **Janela do editor rolável**: os diagramas acima deixaram o formulário
+  mais alto que a tela em muitos casos, e `.window-content` não tinha
+  scroll - confirmado ao vivo que o botão Save ficava literalmente
+  inalcançável (`overflow-y: hidden`, conteúdo de ~1300px numa janela de
+  ~680px). Corrigido com `overflow-y: auto` + `window.resizable: true`
+  em `scripts/hex-editor.js`/`styles/hex-chronicle.css`. Nota: `scrollable`
+  nas `PARTS` do ApplicationV2 só guarda/restaura a posição do scroll entre
+  re-renders - não ativa `overflow-y` sozinho, isso ainda precisa de CSS.
+- **Destaque do hexágono sob o cursor** (`scripts/layer.js`): passar o mouse
+  sobre a cena, com qualquer ferramenta do grupo Hex Chronicle ativa, desenha
+  um contorno translúcido no hexágono embaixo do cursor - útil pra saber o
+  que um clique vai atingir antes de clicar, principalmente pra ferramentas
+  que não têm feedback visual próprio (Reveal, Reveal Structure, Open Link).
+  Puramente geométrico (`pointToHex`/`hexShapePoints`, mesmas funções que o
+  clique já usava) - sem gate de permissão, funciona igual pra GM e jogador.
+  Desenhado num `PIXI.Graphics` irmão do `container` (não filho), então
+  `refresh()` reconstruindo o conteúdo nunca apaga o destaque atual; limpo
+  em `pointerout` e em `_deactivate()` pra não deixar um contorno "fantasma"
+  ao trocar de ferramenta. Testado ao vivo como GM e como jogador: desenha
+  ao entrar num hex, não redesenha à toa dentro do mesmo hex, some ao sair
+  do grid e ao desativar a camada, e sobrevive a um `refresh()`.
 
 ## Em aberto / próximos passos
 
@@ -142,8 +163,6 @@ Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
 aproximadamente por esforço/impacto.
 
 ### Ganhos rápidos
-- **Destaque do hexágono sob o cursor** ao passar o mouse, pra saber qual vai
-  abrir antes de clicar.
 - **Botão de resetar fog** exposto na interface - a função `resetFog()` já
   existe em `fog.js` mas não está ligada a nenhum botão/ferramenta ainda.
 - **Seletor visual de ícone** com preview (em vez de digitar o nome do arquivo

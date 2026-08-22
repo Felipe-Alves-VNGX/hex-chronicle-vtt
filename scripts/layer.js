@@ -12,7 +12,7 @@
  * testing turned up.
  */
 import { getRadius, getOrigin } from "./settings.js";
-import { pointToHex } from "./geometry.js";
+import { pointToHex, hexShapePoints } from "./geometry.js";
 import { renderHexes } from "./render.js";
 import { toggleHex, toggleStructure, getEffectiveContent } from "./fog.js";
 import { HexEditor } from "./hex-editor.js";
@@ -29,10 +29,16 @@ export class HexChronicleLayer extends InteractionLayerBase {
   }
 
   container = null;
+  highlight = null;
+  #hoveredKey = null;
 
   async _draw(options) {
     await super._draw(options);
     this.container = this.addChild(new PIXI.Container());
+    // Drawn as a sibling on top of `container`, not inside it, so refresh()
+    // freely destroying/rebuilding container's children (see below) never
+    // touches whatever's currently highlighted.
+    this.highlight = this.addChild(new PIXI.Graphics());
     this.hitArea = canvas.dimensions.rect;
     // Starts inactive - _activate()/_deactivate() (below) are what actually
     // turn pointer handling on/off, driven by whichever scene-controls
@@ -44,6 +50,8 @@ export class HexChronicleLayer extends InteractionLayerBase {
     // confirmed live against a real v13 world (PIXI "pointerup" reaches the
     // layer fine; _onClickLeft simply never gets invoked without this).
     this.on("pointerup", this._onClickLeft.bind(this));
+    this.on("pointermove", this._onHover.bind(this));
+    this.on("pointerout", this._clearHighlight.bind(this));
     await this.refresh();
   }
 
@@ -60,6 +68,35 @@ export class HexChronicleLayer extends InteractionLayerBase {
   _deactivate() {
     super._deactivate();
     this.eventMode = "none";
+    this._clearHighlight();
+  }
+
+  /** Outlines whichever hex is currently under the cursor, so a viewer can
+   * tell what a click will land on before committing to it - for every tool
+   * in this group, GM or not (it's pure geometry, nothing content-gated
+   * about it). Keyed by "col,row" to skip redrawing on every pixel of mouse
+   * movement within the same cell. */
+  _onHover(event) {
+    if (!canvas.scene) return;
+    const local = event.getLocalPosition(this);
+    const hex = pointToHex(local.x, local.y, getRadius(), getOrigin());
+    const key = hex ? `${hex.col},${hex.row}` : null;
+    if (key === this.#hoveredKey) return;
+    this.#hoveredKey = key;
+
+    this.highlight.clear();
+    if (!hex) return;
+    const pts = hexShapePoints(hex.col, hex.row, getRadius(), getOrigin());
+    const flat = pts.flatMap((p) => [p.x, p.y]);
+    this.highlight.lineStyle(Math.max(2, getRadius() / 12), 0xffffff, 0.9);
+    this.highlight.beginFill(0xffffff, 0.12);
+    this.highlight.drawPolygon(flat);
+    this.highlight.endFill();
+  }
+
+  _clearHighlight() {
+    this.#hoveredKey = null;
+    this.highlight?.clear();
   }
 
   async refresh() {
