@@ -31,6 +31,7 @@ export class HexChronicleLayer extends InteractionLayerBase {
   container = null;
   highlight = null;
   #hoveredKey = null;
+  #flashTimeout = null;
 
   async _draw(options) {
     await super._draw(options);
@@ -97,6 +98,32 @@ export class HexChronicleLayer extends InteractionLayerBase {
   _clearHighlight() {
     this.#hoveredKey = null;
     this.highlight?.clear();
+  }
+
+  /** One-off highlight flash for a specific hex, in a different color from
+   * the hover outline so it reads as "the camera just centered here" rather
+   * than "your cursor is here". Works even while this layer isn't the
+   * active control (the graphics object is always present - only pointer
+   * event handling is gated by activation) - used by the hex directory's
+   * "go to" button so a GM gets visual confirmation of where the camera
+   * jumped to. */
+  flashHex(col, row, duration = 1200) {
+    if (!this.highlight) return;
+    const radius = getRadius();
+    const origin = getOrigin();
+    const pts = hexShapePoints(col, row, radius, origin);
+    const flat = pts.flatMap((p) => [p.x, p.y]);
+    this.highlight.clear();
+    this.highlight.lineStyle(Math.max(2, radius / 10), 0xffcc00, 1);
+    this.highlight.beginFill(0xffcc00, 0.15);
+    this.highlight.drawPolygon(flat);
+    this.highlight.endFill();
+
+    clearTimeout(this.#flashTimeout);
+    this.#flashTimeout = setTimeout(() => {
+      // Don't clobber a real hover outline that started during the flash.
+      if (this.#hoveredKey === null) this.highlight.clear();
+    }, duration);
   }
 
   async refresh() {

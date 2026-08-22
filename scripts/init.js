@@ -2,6 +2,11 @@ import { MODULE_ID, registerSettings } from "./settings.js";
 import { HexChronicleLayer } from "./layer.js";
 import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
+import { HexDirectory } from "./hex-directory.js";
+
+// Singleton so repeated clicks on the toolbar button re-focus the same
+// window instead of stacking up duplicates.
+let hexDirectoryApp = null;
 
 Hooks.once("init", () => {
   registerSettings();
@@ -84,6 +89,20 @@ Hooks.on("getSceneControlButtons", (controls) => {
         button: true,
         visible: game.user.isGM,
         onChange: () => confirmResetFog(),
+      },
+      directory: {
+        name: "directory",
+        title: "HEXCHRON.ToolDirectory",
+        icon: "fa-solid fa-table-list",
+        button: true,
+        visible: game.user.isGM,
+        onChange: () => {
+          if (hexDirectoryApp?.rendered) hexDirectoryApp.bringToFront();
+          else {
+            hexDirectoryApp = new HexDirectory();
+            hexDirectoryApp.render(true);
+          }
+        },
       },
     },
   };

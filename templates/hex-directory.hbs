@@ -1,0 +1,49 @@
+<div class="hc-directory">
+  <header class="hc-directory-header">
+    <input type="search" name="search" placeholder="{{localize 'HEXCHRON.DirectorySearchPlaceholder'}}" />
+    <span class="hc-directory-count">{{rows.length}} {{localize "HEXCHRON.DirectoryHexCount"}}</span>
+  </header>
+
+  {{#if hasHexes}}
+  <div class="hc-directory-list">
+    <table>
+      <thead>
+        <tr>
+          <th class="hc-directory-col-coord">{{localize "HEXCHRON.DirectoryColCoord"}}</th>
+          <th>{{localize "HEXCHRON.DirectoryColTerrain"}}</th>
+          <th>{{localize "HEXCHRON.DirectoryColLabel"}}</th>
+          <th class="hc-directory-col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each rows}}
+        <tr class="hc-directory-row" data-search="{{this.search}}">
+          <td class="hc-directory-coord">{{this.coordLabel}}</td>
+          <td>
+            <span class="hc-directory-terrain">{{this.terrain}}</span>
+            {{#if this.mixed}}<span class="hc-directory-mixed">({{this.mixed}})</span>{{/if}}
+            {{#if this.zone}}<div class="hc-directory-zones">{{this.zone}}</div>{{/if}}
+          </td>
+          <td>
+            {{#if this.alt}}<span class="hc-directory-alt">{{this.alt}}</span>{{/if}}
+            {{#if this.icon}}<i class="fa-solid fa-tower-observation" data-tooltip="{{this.icon}}"></i>{{/if}}
+            {{#if this.hasLink}}<i class="fa-solid fa-link" data-tooltip="{{localize 'HEXCHRON.FieldLink'}}"></i>{{/if}}
+          </td>
+          <td class="hc-directory-actions">
+            <button type="button" data-action="goto" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.DirectoryGoto'}}">
+              <i class="fa-solid fa-crosshairs"></i>
+            </button>
+            <button type="button" data-action="edit" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.ToolEdit'}}">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <p class="hc-directory-no-matches" hidden>{{localize "HEXCHRON.DirectoryNoMatches"}}</p>
+  </div>
+  {{else}}
+  <p class="hc-directory-empty">{{localize "HEXCHRON.DirectoryEmpty"}}</p>
+  {{/if}}
+</div>

@@ -178,6 +178,26 @@ tocar na cena compartilhada). Também sem bugs novos:
   no storage. Testado ao vivo como GM: as 14 imagens carregam sem 404,
   clique/toggle/digitação sincronizam certo, e um submit completo salva o
   ícone escolhido.
+- **Diretório de hexágonos** (`scripts/hex-directory.js` +
+  `templates/hex-directory.hbs`): janela GM-only nova (botão `fa-table-list`
+  no grupo Hex Chronicle) que lista todo hexágono já autorado na cena atual
+  - coordenada, terreno (+ mistura + zonas), label/ícone/link - com busca
+  por texto livre (filtra por qualquer um desses campos) e dois botões por
+  linha: "ir até" (centraliza a câmera no hex via `canvas.animatePan` +
+  acende um flash amarelo nele, `HexChronicleLayer#flashHex()` - novo,
+  funciona mesmo com a camada Hex Chronicle desativada) e "editar" (abre o
+  `HexEditor` daquele hex direto). Lê o conteúdo *cru*, sem gate de fog -
+  é GM-only, então não tem nada a esconder do próprio GM. "Dinâmico": a
+  lista se auto-atualiza sozinha ao editar qualquer hex (hook `updateScene`)
+  e ao trocar de cena (hook `canvasReady`) enquanto a janela fica aberta -
+  sem botão de refresh manual. É singleton (clicar de novo no botão só foca
+  a janela já aberta, não duplica) e desregistra os hooks no `close()`.
+  Testado ao vivo como GM: lista carrega e ordena certo, busca filtra e
+  mostra "sem resultados" corretamente, "ir até" chama `animatePan` com as
+  coordenadas certas e acende o flash, "editar" abre o hex certo, salvar
+  uma edição reflete na lista sem eu chamar nada manualmente, fechar a
+  janela realmente para de escutar (editar depois não reabre nem erra), e
+  o botão não aparece pra um jogador não-GM.
 
 ## Em aberto / próximos passos
 
@@ -185,7 +205,6 @@ Nenhum destes tem prazo definido - são ideias discutidas, priorizadas
 aproximadamente por esforço/impacto.
 
 ### Para mapas grandes
-- **Buscar/ir para hexágono por coordenada.**
 - **Legenda de terreno/zona** visível na tela.
 
 ### Para overlay em arte customizada
