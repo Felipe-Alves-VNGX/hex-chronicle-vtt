@@ -43,6 +43,7 @@
           <th class="hc-overview-col-coord">{{localize "HEXCHRON.OverviewColCoord"}}</th>
           <th>{{localize "HEXCHRON.OverviewColTerrain"}}</th>
           <th>{{localize "HEXCHRON.OverviewColLabel"}}</th>
+          <th>{{localize "HEXCHRON.OverviewColNotes"}}</th>
           <th>{{localize "HEXCHRON.OverviewColRevealed"}}</th>
           <th class="hc-overview-col-actions"></th>
         </tr>
@@ -56,10 +57,13 @@
             {{#if this.mixed}}<span class="hc-overview-mixed">({{this.mixed}})</span>{{/if}}
             {{#if this.zone}}<div class="hc-overview-zones">{{this.zone}}</div>{{/if}}
           </td>
-          <td>
+          <td class="hc-overview-editable" data-action="editField" data-field="alt" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.OverviewClickToEdit'}}">
             {{#if this.alt}}<span class="hc-overview-alt">{{this.alt}}</span>{{/if}}
             {{#if this.icon}}<i class="fa-solid fa-tower-observation" data-tooltip="{{this.icon}}"></i>{{/if}}
             {{#if this.hasLink}}<i class="fa-solid fa-link" data-tooltip="{{localize 'HEXCHRON.FieldLink'}}"></i>{{/if}}
+          </td>
+          <td class="hc-overview-editable hc-overview-notes" data-action="editField" data-field="notes" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{this.notes}}">
+            {{this.notesPreview}}
           </td>
           <td class="hc-overview-revealed">
             <button type="button" class="hc-overview-reveal-toggle {{#if this.terrainRevealed}}active{{/if}}" data-action="toggleTerrain" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.ToolReveal'}}">

@@ -16,7 +16,7 @@
  * goes stale while left open - no manual refresh button needed.
  */
 import { MODULE_ID, getRadius, getOrigin } from "./settings.js";
-import { parseHexKey, normalizeHexContent } from "./data-model.js";
+import { parseHexKey, normalizeHexContent, applyHexPatches } from "./data-model.js";
 import { tileCenter } from "./geometry.js";
 import { HexEditor } from "./hex-editor.js";
 import { isExplored, toggleHex, isStructureRevealed, toggleStructure } from "./fog.js";
@@ -74,6 +74,8 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
           zoneKey: content.zone.join("|"),
           hasLink: !!content.link,
           hasNotes: !!content.notes,
+          notes: content.notes,
+          notesPreview: content.notes.length > 60 ? `${content.notes.slice(0, 60)}…` : content.notes,
           terrainRevealed: isExplored(col, row, scene),
           structureRevealed: isStructureRevealed(col, row, scene),
           search,
@@ -121,6 +123,9 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onRender(context, options) {
     await super._onRender(context, options);
 
+    for (const cell of this.element.querySelectorAll('[data-action="editField"]')) {
+      cell.addEventListener("click", () => this.#startInlineEdit(cell));
+    }
     for (const btn of this.element.querySelectorAll('[data-action="goto"]')) {
       btn.addEventListener("click", () => this.#gotoHex(Number(btn.dataset.col), Number(btn.dataset.row)));
     }
@@ -186,6 +191,43 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#applyFilters();
+  }
+
+  #startInlineEdit(cell) {
+    if (cell.querySelector("textarea")) return;
+    const col = Number(cell.dataset.col);
+    const row = Number(cell.dataset.row);
+    const field = cell.dataset.field;
+    const original = cell.dataset.tooltip ?? "";
+    const originalHtml = cell.innerHTML;
+
+    const textarea = document.createElement("textarea");
+    textarea.value = field === "notes" ? original : (cell.querySelector(".hc-overview-alt")?.textContent ?? "");
+    textarea.rows = field === "notes" ? 3 : 1;
+    textarea.className = "hc-overview-inline-editor";
+    cell.innerHTML = "";
+    cell.appendChild(textarea);
+    textarea.focus();
+
+    const commit = async () => {
+      const scene = canvas.scene;
+      await applyHexPatches(scene, [{ col, row, patch: { [field]: textarea.value } }]);
+    };
+    const cancel = () => {
+      cell.innerHTML = originalHtml;
+    };
+
+    textarea.addEventListener("blur", commit);
+    textarea.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && field !== "notes") {
+        event.preventDefault();
+        textarea.blur();
+      }
+      if (event.key === "Escape") {
+        textarea.removeEventListener("blur", commit);
+        cancel();
+      }
+    });
   }
 
   #gotoHex(col, row) {

@@ -399,6 +399,25 @@
   margin-right: 0.3rem;
 }
 
+.hc-overview-editable {
+  cursor: text;
+}
+
+.hc-overview-notes {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.8;
+  font-size: 0.78rem;
+}
+
+.hc-overview-inline-editor {
+  width: 100%;
+  font: inherit;
+  resize: vertical;
+}
+
 .hc-overview-revealed {
   white-space: nowrap;
   text-align: center;
