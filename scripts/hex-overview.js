@@ -19,7 +19,7 @@ import { MODULE_ID, getRadius, getOrigin } from "./settings.js";
 import { parseHexKey, normalizeHexContent, applyHexPatches } from "./data-model.js";
 import { tileCenter } from "./geometry.js";
 import { HexEditor } from "./hex-editor.js";
-import { isExplored, toggleHex, isStructureRevealed, toggleStructure } from "./fog.js";
+import { isExplored, toggleHex, isStructureRevealed, toggleStructure, setExploredMany, setStructureRevealedMany } from "./fog.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -41,6 +41,8 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
   #hooks = [];
 
   #filters = { text: "", terrain: "", zoneTag: "", hasNotes: "any", hasLink: "any" };
+
+  #selected = new Set();
 
   #onUpdateScene = (scene, changes) => {
     if (scene.id !== canvas.scene?.id) return;
@@ -203,6 +205,42 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#applyFilters();
+
+    const selectAll = this.element.querySelector('[data-action="selectAll"]');
+    selectAll?.addEventListener("change", () => {
+      for (const row of this.element.querySelectorAll(".hc-overview-row:not([hidden])")) {
+        const box = row.querySelector('[data-action="select"]');
+        const key = `${box.dataset.col},${box.dataset.row}`;
+        box.checked = selectAll.checked;
+        if (selectAll.checked) this.#selected.add(key);
+        else this.#selected.delete(key);
+      }
+      this.#updateBulkBar();
+    });
+
+    for (const box of this.element.querySelectorAll('[data-action="select"]')) {
+      const key = `${box.dataset.col},${box.dataset.row}`;
+      box.checked = this.#selected.has(key);
+      box.addEventListener("change", () => {
+        if (box.checked) this.#selected.add(key);
+        else this.#selected.delete(key);
+        this.#updateBulkBar();
+      });
+    }
+    this.#updateBulkBar();
+
+    this.element.querySelector('[data-action="bulkRevealTerrain"]')?.addEventListener("click", () => this.#bulkSetExplored(true));
+    this.element.querySelector('[data-action="bulkHideTerrain"]')?.addEventListener("click", () => this.#bulkSetExplored(false));
+    this.element.querySelector('[data-action="bulkRevealStructure"]')?.addEventListener("click", () => this.#bulkSetStructure(true));
+    this.element.querySelector('[data-action="bulkHideStructure"]')?.addEventListener("click", () => this.#bulkSetStructure(false));
+    this.element.querySelector('[data-action="bulkAddZone"]')?.addEventListener("click", () => this.#bulkZoneTag(true));
+    this.element.querySelector('[data-action="bulkRemoveZone"]')?.addEventListener("click", () => this.#bulkZoneTag(false));
+    this.element.querySelector('[data-action="bulkClear"]')?.addEventListener("click", () => {
+      this.#selected.clear();
+      this.#updateBulkBar();
+      for (const box of this.element.querySelectorAll('[data-action="select"]')) box.checked = false;
+      if (selectAll) selectAll.checked = false;
+    });
   }
 
   #startInlineEdit(cell) {
@@ -259,6 +297,48 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
   async #removeZoneTag(col, row, tag) {
     const current = await this.#currentZoneList(col, row);
     await applyHexPatches(canvas.scene, [{ col, row, patch: { zone: current.filter((z) => z !== tag) } }]);
+  }
+
+  #selectedCells() {
+    return [...this.#selected].map((key) => {
+      const { col, row } = parseHexKey(key);
+      return [col, row];
+    });
+  }
+
+  #updateBulkBar() {
+    const bar = this.element.querySelector(".hc-overview-bulk-bar");
+    if (!bar) return;
+    bar.hidden = this.#selected.size === 0;
+    const count = bar.querySelector(".hc-overview-bulk-count");
+    if (count) count.textContent = game.i18n.format("HEXCHRON.OverviewBulkCount", { count: this.#selected.size });
+  }
+
+  async #bulkSetExplored(value) {
+    await setExploredMany(this.#selectedCells(), value);
+    await canvas.hexChronicle?.refresh();
+    this.#selected.clear();
+  }
+
+  async #bulkSetStructure(value) {
+    await setStructureRevealedMany(this.#selectedCells(), value);
+    await canvas.hexChronicle?.refresh();
+    this.#selected.clear();
+  }
+
+  async #bulkZoneTag(add) {
+    const promptKey = add ? "HEXCHRON.OverviewAddZoneTagPrompt" : "HEXCHRON.OverviewRemoveZoneTagPrompt";
+    const tag = (window.prompt(game.i18n.localize(promptKey)) ?? "").trim();
+    if (!tag) return;
+    const scene = canvas.scene;
+    const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
+    const patches = this.#selectedCells().map(([col, row]) => {
+      const existing = normalizeHexContent(raw[`${col},${row}`] ?? {}).zone;
+      const zone = add ? (existing.includes(tag) ? existing : [...existing, tag]) : existing.filter((z) => z !== tag);
+      return { col, row, patch: { zone } };
+    });
+    await applyHexPatches(scene, patches);
+    this.#selected.clear();
   }
 
   #gotoHex(col, row) {

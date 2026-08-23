@@ -35,11 +35,23 @@
     <span class="hc-overview-stat">{{localize "HEXCHRON.OverviewStatIcon"}}: {{stats.withIcon}}</span>
   </div>
 
+  <div class="hc-overview-bulk-bar" hidden>
+    <span class="hc-overview-bulk-count"></span>
+    <button type="button" data-action="bulkRevealTerrain">{{localize "HEXCHRON.OverviewBulkRevealTerrain"}}</button>
+    <button type="button" data-action="bulkHideTerrain">{{localize "HEXCHRON.OverviewBulkHideTerrain"}}</button>
+    <button type="button" data-action="bulkRevealStructure">{{localize "HEXCHRON.OverviewBulkRevealStructure"}}</button>
+    <button type="button" data-action="bulkHideStructure">{{localize "HEXCHRON.OverviewBulkHideStructure"}}</button>
+    <button type="button" data-action="bulkAddZone">{{localize "HEXCHRON.OverviewBulkAddZone"}}</button>
+    <button type="button" data-action="bulkRemoveZone">{{localize "HEXCHRON.OverviewBulkRemoveZone"}}</button>
+    <button type="button" data-action="bulkClear">{{localize "HEXCHRON.OverviewBulkClear"}}</button>
+  </div>
+
   {{#if hasHexes}}
   <div class="hc-overview-list">
     <table>
       <thead>
         <tr>
+          <th class="hc-overview-col-select"><input type="checkbox" data-action="selectAll" /></th>
           <th class="hc-overview-col-coord">{{localize "HEXCHRON.OverviewColCoord"}}</th>
           <th>{{localize "HEXCHRON.OverviewColTerrain"}}</th>
           <th>{{localize "HEXCHRON.OverviewColLabel"}}</th>
@@ -51,6 +63,7 @@
       <tbody>
         {{#each rows}}
         <tr class="hc-overview-row" data-search="{{this.search}}" data-terrain="{{this.terrainRaw}}" data-zones="{{this.zoneKey}}" data-has-notes="{{this.hasNotes}}" data-has-link="{{this.hasLink}}">
+          <td class="hc-overview-select"><input type="checkbox" data-action="select" data-col="{{this.col}}" data-row="{{this.row}}" /></td>
           <td class="hc-overview-coord">{{this.coordLabel}}</td>
           <td>
             <span class="hc-overview-terrain">{{this.terrain}}</span>
