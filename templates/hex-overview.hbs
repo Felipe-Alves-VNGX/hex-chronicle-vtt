@@ -1,8 +1,39 @@
 <div class="hc-overview">
   <header class="hc-overview-header">
     <input type="search" name="search" placeholder="{{localize 'HEXCHRON.OverviewSearchPlaceholder'}}" />
-    <span class="hc-overview-count">{{rows.length}} {{localize "HEXCHRON.OverviewHexCount"}}</span>
+    <select name="filterTerrain">
+      <option value="">{{localize "HEXCHRON.OverviewFilterAnyTerrain"}}</option>
+      {{#each terrainOptions}}
+      <option value="{{this}}">{{this}}</option>
+      {{/each}}
+    </select>
+    <select name="filterZone">
+      <option value="">{{localize "HEXCHRON.OverviewFilterAnyZone"}}</option>
+      {{#each zoneOptions}}
+      <option value="{{this}}">{{this}}</option>
+      {{/each}}
+    </select>
+    <select name="filterNotes">
+      <option value="any">{{localize "HEXCHRON.OverviewFilterNotesAny"}}</option>
+      <option value="yes">{{localize "HEXCHRON.OverviewFilterNotesYes"}}</option>
+      <option value="no">{{localize "HEXCHRON.OverviewFilterNotesNo"}}</option>
+    </select>
+    <select name="filterLink">
+      <option value="any">{{localize "HEXCHRON.OverviewFilterLinkAny"}}</option>
+      <option value="yes">{{localize "HEXCHRON.OverviewFilterLinkYes"}}</option>
+      <option value="no">{{localize "HEXCHRON.OverviewFilterLinkNo"}}</option>
+    </select>
   </header>
+
+  <div class="hc-overview-stats">
+    <span class="hc-overview-stat">{{stats.total}} {{localize "HEXCHRON.OverviewHexCount"}}</span>
+    {{#each stats.terrainCounts}}
+    <span class="hc-overview-stat-chip">{{this.type}} · {{this.count}}</span>
+    {{/each}}
+    <span class="hc-overview-stat">{{localize "HEXCHRON.OverviewStatNotes"}}: {{stats.withNotes}}</span>
+    <span class="hc-overview-stat">{{localize "HEXCHRON.OverviewStatLink"}}: {{stats.withLink}}</span>
+    <span class="hc-overview-stat">{{localize "HEXCHRON.OverviewStatIcon"}}: {{stats.withIcon}}</span>
+  </div>
 
   {{#if hasHexes}}
   <div class="hc-overview-list">
@@ -17,7 +48,7 @@
       </thead>
       <tbody>
         {{#each rows}}
-        <tr class="hc-overview-row" data-search="{{this.search}}">
+        <tr class="hc-overview-row" data-search="{{this.search}}" data-terrain="{{this.terrainRaw}}" data-zones="{{this.zoneKey}}" data-has-notes="{{this.hasNotes}}" data-has-link="{{this.hasLink}}">
           <td class="hc-overview-coord">{{this.coordLabel}}</td>
           <td>
             <span class="hc-overview-terrain">{{this.terrain}}</span>

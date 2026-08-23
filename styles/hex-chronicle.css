@@ -316,6 +316,32 @@
   white-space: nowrap;
 }
 
+.hc-overview-header {
+  flex-wrap: wrap;
+}
+
+.hc-overview-header select {
+  font-size: 0.78rem;
+}
+
+.hc-overview-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.hc-overview-stat,
+.hc-overview-stat-chip {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
 .hc-overview-list {
   flex: 1;
   min-height: 0;

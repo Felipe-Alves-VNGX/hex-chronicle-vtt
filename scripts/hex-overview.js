@@ -39,6 +39,8 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
 
   #hooks = [];
 
+  #filters = { text: "", terrain: "", zoneTag: "", hasNotes: "any", hasLink: "any" };
+
   #onUpdateScene = (scene, changes) => {
     if (scene.id !== canvas.scene?.id) return;
     if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}`)) this.render();
@@ -62,16 +64,43 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
           row,
           coordLabel: coordLabel(col, row),
           terrain: content.terrain.type || "-",
+          terrainRaw: content.terrain.type || "",
           mixed,
           alt: content.alt,
           icon: content.icon,
           zone: content.zone.join(", "),
+          zoneList: content.zone,
+          zoneKey: content.zone.join("|"),
           hasLink: !!content.link,
+          hasNotes: !!content.notes,
           search,
         };
       })
       .sort((a, b) => a.row - b.row || a.col - b.col);
-    return { rows, hasHexes: rows.length > 0, sceneName: scene?.name ?? "" };
+
+    const terrainCounts = {};
+    const zoneCounts = {};
+    let withNotes = 0;
+    let withLink = 0;
+    let withIcon = 0;
+    for (const r of rows) {
+      if (r.terrainRaw) terrainCounts[r.terrainRaw] = (terrainCounts[r.terrainRaw] ?? 0) + 1;
+      for (const z of r.zoneList) zoneCounts[z] = (zoneCounts[z] ?? 0) + 1;
+      if (r.hasNotes) withNotes++;
+      if (r.hasLink) withLink++;
+      if (r.icon) withIcon++;
+    }
+    const stats = {
+      total: rows.length,
+      terrainCounts: Object.entries(terrainCounts).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count),
+      withNotes,
+      withLink,
+      withIcon,
+    };
+    const terrainOptions = stats.terrainCounts.map((t) => t.type);
+    const zoneOptions = Object.keys(zoneCounts).sort();
+
+    return { rows, hasHexes: rows.length > 0, sceneName: scene?.name ?? "", stats, terrainOptions, zoneOptions };
   }
 
   async _onFirstRender(context, options) {
@@ -97,8 +126,51 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const search = this.element.querySelector('input[name="search"]');
-    search?.addEventListener("input", () => this.#applyFilter(search.value));
-    if (search?.value) this.#applyFilter(search.value);
+    if (search) {
+      search.value = this.#filters.text;
+      search.addEventListener("input", () => {
+        this.#filters.text = search.value;
+        this.#applyFilters();
+      });
+    }
+
+    const terrainSelect = this.element.querySelector('select[name="filterTerrain"]');
+    if (terrainSelect) {
+      terrainSelect.value = this.#filters.terrain;
+      terrainSelect.addEventListener("change", () => {
+        this.#filters.terrain = terrainSelect.value;
+        this.#applyFilters();
+      });
+    }
+
+    const zoneSelect = this.element.querySelector('select[name="filterZone"]');
+    if (zoneSelect) {
+      zoneSelect.value = this.#filters.zoneTag;
+      zoneSelect.addEventListener("change", () => {
+        this.#filters.zoneTag = zoneSelect.value;
+        this.#applyFilters();
+      });
+    }
+
+    const notesSelect = this.element.querySelector('select[name="filterNotes"]');
+    if (notesSelect) {
+      notesSelect.value = this.#filters.hasNotes;
+      notesSelect.addEventListener("change", () => {
+        this.#filters.hasNotes = notesSelect.value;
+        this.#applyFilters();
+      });
+    }
+
+    const linkSelect = this.element.querySelector('select[name="filterLink"]');
+    if (linkSelect) {
+      linkSelect.value = this.#filters.hasLink;
+      linkSelect.addEventListener("change", () => {
+        this.#filters.hasLink = linkSelect.value;
+        this.#applyFilters();
+      });
+    }
+
+    this.#applyFilters();
   }
 
   #gotoHex(col, row) {
@@ -107,11 +179,17 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     canvas.hexChronicle?.flashHex(col, row);
   }
 
-  #applyFilter(text) {
+  #applyFilters() {
+    const { text, terrain, zoneTag, hasNotes, hasLink } = this.#filters;
     const query = text.trim().toLowerCase();
     let visible = 0;
     for (const row of this.element.querySelectorAll(".hc-overview-row")) {
-      const match = !query || (row.dataset.search ?? "").includes(query);
+      const matchesText = !query || (row.dataset.search ?? "").includes(query);
+      const matchesTerrain = !terrain || row.dataset.terrain === terrain;
+      const matchesZone = !zoneTag || (row.dataset.zones ?? "").split("|").includes(zoneTag);
+      const matchesNotes = hasNotes === "any" || (hasNotes === "yes") === (row.dataset.hasNotes === "true");
+      const matchesLink = hasLink === "any" || (hasLink === "yes") === (row.dataset.hasLink === "true");
+      const match = matchesText && matchesTerrain && matchesZone && matchesNotes && matchesLink;
       row.hidden = !match;
       if (match) visible++;
     }
