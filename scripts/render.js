@@ -10,7 +10,8 @@
  * simply never draws them for non-GM users. Revisit if the campaign wants
  * players to see zone outlines.
  */
-import { MODULE_ID, getRadius, getOrigin, getPaletteOverride } from "./settings.js";
+import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber } from "./settings.js";
+import { getCustomBiomes } from "./custom-registry.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
 import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
@@ -61,9 +62,14 @@ const textureCache = new Map();
  * as the actual map render - keeps the picker WYSIWYG instead of drifting
  * out of sync with a second hardcoded color list. */
 export function palette(scene = canvas.scene) {
+  const custom = Object.fromEntries(
+    Object.entries(getCustomBiomes())
+      .map(([slug, biome]) => [slug, toColorNumber(biome.color)])
+      .filter(([, v]) => v !== undefined)
+  );
   const override = getPaletteOverride(scene);
   return {
-    terrain: { ...DEFAULT_TERRAIN_COLORS, ...(override.terrain ?? {}) },
+    terrain: { ...DEFAULT_TERRAIN_COLORS, ...custom, ...(override.terrain ?? {}) },
     zone: { ...DEFAULT_ZONE_COLORS, ...(override.zone ?? {}) },
   };
 }

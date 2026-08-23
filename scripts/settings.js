@@ -136,7 +136,7 @@ export function getAutoRevealRadius(scene = canvas.scene) {
   return game.settings.get(MODULE_ID, "autoRevealRadius");
 }
 
-function toColorNumber(value) {
+export function toColorNumber(value) {
   if (typeof value === "number") return value;
   if (typeof value === "string" && value.startsWith("#")) return Number.parseInt(value.slice(1), 16);
   return undefined;
