@@ -19,7 +19,7 @@
  * doesn't have to leave the form to flip it.
  */
 import { MODULE_ID } from "./settings.js";
-import { normalizeHexContent, hexKey, TERRAIN_TYPES } from "./data-model.js";
+import { normalizeHexContent, hexKey, getAllTerrainTypes } from "./data-model.js";
 import { isStructureRevealed, setStructureRevealed } from "./fog.js";
 import { openHexLink } from "./links.js";
 import { attachTerrainDiagram, attachPathDiagram } from "./hex-diagram.js";
@@ -84,7 +84,7 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       // 2) silently saved terrain.type as "2", not "heavy_woods", for
       // every hex ever set through this dropdown. An object maps each
       // option's real value to its own label instead.
-      terrainTypes: Object.fromEntries(TERRAIN_TYPES.map((t) => [t, t])),
+      terrainTypes: Object.fromEntries(getAllTerrainTypes().map((t) => [t, t])),
       terrainType: content.terrain.type ?? "",
       mixedTerrain: content.terrain.mixed.map((m) => `${m.type}: ${m.sides.join(" ")}`).join("\n"),
       alt: content.alt,

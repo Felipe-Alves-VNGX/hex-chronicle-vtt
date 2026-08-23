@@ -17,7 +17,7 @@
  * diagram actually paints, same as normalizeHexContent does on save.
  */
 import { TERRAIN_ZONES, PATH_ANCHORS, zonePolygon, fineRingPoints, hexShapePoints, normalizeCardinal, isValidZone, isValidPathAnchor } from "./geometry.js";
-import { TERRAIN_TYPES, expandZoneToken, expandPathToken } from "./data-model.js";
+import { getAllTerrainTypes, expandZoneToken, expandPathToken } from "./data-model.js";
 import { palette } from "./render.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -104,7 +104,7 @@ export function pathsToText(paths) {
  * to, never written. */
 export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
   let zoneMap = textToZoneMap(textarea.value);
-  let armedType = TERRAIN_TYPES[0];
+  let armedType = getAllTerrainTypes()[0];
 
   const wrap = document.createElement("div");
   wrap.className = "hc-terrain-diagram";
@@ -126,7 +126,7 @@ export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
   const paletteRow = document.createElement("div");
   paletteRow.className = "hc-brush-palette";
   const swatches = [];
-  for (const type of TERRAIN_TYPES) {
+  for (const type of getAllTerrainTypes()) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hc-brush-swatch";

@@ -36,6 +36,7 @@
  */
 import { isValidZone, isValidPathAnchor, normalizeCardinal } from "./geometry.js";
 import { MODULE_ID } from "./settings.js";
+import { getCustomBiomes } from "./custom-registry.js";
 
 /** The original 7-token vocabulary (N/NE/SE/S/SW/NW/C), kept forever valid
  * for reading - old hex data, hand-typed text, and imported files all still
@@ -84,6 +85,15 @@ export const TERRAIN_TYPES = [
   "desert",
   "unknown",
 ];
+
+/** Built-in terrain types plus every GM-registered custom biome
+ * (custom-registry.js) - the full list a GM can pick from anywhere terrain
+ * type is chosen (the editor's dropdown, the mixed-terrain brush palette).
+ * Recomputed on every call (not cached) since custom biomes can be
+ * added/removed without a reload. */
+export function getAllTerrainTypes() {
+  return [...TERRAIN_TYPES, ...Object.keys(getCustomBiomes())];
+}
 
 export function emptyHex() {
   return { terrain: { type: undefined, mixed: [] }, alt: "", icon: "", roads: [], rivers: [], zone: [], link: "", notes: "" };
