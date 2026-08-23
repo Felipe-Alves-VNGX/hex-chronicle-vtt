@@ -34,7 +34,8 @@ still planned.
   collapsed "Edit as text" fallback.
 - Two independent fog-of-war layers (terrain, and separately its
   building/label/link), manual or automatic reveal.
-- A searchable directory to jump straight to any authored hex, and an
+- A GM dashboard ("Hex Overview") with aggregate stats, filters, inline
+  quick-edit, and batched bulk actions across every authored hex, plus an
   on-screen terrain/zone color legend.
 - Bulk import from the original hex-chronicle tool's `.md`/`.yaml`/`.yml`
   files.
@@ -82,8 +83,8 @@ click will land on before committing to it.
 
 - **Edit Hex** (GM; does nothing yet for players - see "Known limitations"
   in [ROADMAP.md](ROADMAP.md)): click a hex cell to open its editor -
-  terrain type, mixed terrain, building icon, label, roads, rivers, and
-  zones. Mixed terrain and roads/rivers are painted/drawn on a clickable
+  terrain type, mixed terrain, building icon, label, roads, rivers, zones,
+  and GM-only notes. Mixed terrain and roads/rivers are painted/drawn on a clickable
   diagram of the hex (see "Fine-grained terrain zones" below); the
   building icon is picked from a preview grid. The original line-based
   text fields still work too, behind a collapsed "Edit as text" toggle -
@@ -108,10 +109,13 @@ click will land on before committing to it.
 - **Reset Fog** (GM): clears every hex's explored state for the current
   scene, behind a confirmation dialog - it's irreversible and affects the
   whole party at once.
-- **Hex Directory** (GM): a searchable, live-updating list of every
-  authored hex on the current scene - jump the camera to one ("go to",
-  with a brief highlight flash) or open it straight in the editor,
-  without hunting for it on the map.
+- **Hex Overview** (GM): a dashboard over every authored hex on the current
+  scene - stats (terrain/notes/link/icon counts), combinable filters
+  (terrain, zone, notes, link), inline click-to-edit for a hex's label/
+  notes/zone tags, per-row terrain/structure reveal toggles, and batched
+  bulk actions (reveal/hide terrain or structure, add/remove a zone tag)
+  across a multi-row selection - all without hunting for hexes on the map
+  or opening the full editor one at a time.
 - **Toggle Legend** (everyone): shows/hides a small on-screen panel with
   the terrain colors and zone-position numbering actually used on the
   current scene (zone *tags* like "secured"/"dangerous" are GM-only in

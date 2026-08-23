@@ -302,6 +302,23 @@ também dobraram: de 6+`C` pra **12+`C`** pontos de ancoragem (`N1..N12` +
   certos nos dois casos, "Zone positions" aparece pros dois enquanto "Zones"
   continua GM-only.
 
+### Hex Overview (2026-08-23)
+Substituição do Hex Directory (lista pesquisável) por Hex Overview
+(dashboard). Novas funcionalidades:
+- **Agregação de estatísticas**: contagem de terreno, notas, links e ícones
+  em todos os hexes da cena num relance.
+- **Filtros combinável**: terreno, zona, notas e link - refinam a tabela em
+  tempo real sem recarregar.
+- **Edição inline rápida**: clique no rótulo/notas/zona de um hex pra editar
+  direto, sem abrir o formulário completo.
+- **Toggles por linha**: revelar/ocultar terreno ou estrutura por hex
+  individual, ou via seleção múltipla (ver próximo ponto).
+- **Ações em lote**: selecione múltiplas linhas, depois revele/oculte terreno
+  ou estrutura, ou adicione/remova uma zona-tag, tudo de uma vez - sem abrir
+  o editor pra cada hex.
+- **Campo de notas GM**: novo campo no editor de hex, visível só pro GM,
+  pra anotações privadas (estratégia de campanha, NPCs que moram ali, etc).
+
 ## Limitações conhecidas (decisões deliberadas, não bugs)
 
 - **Sigilo é "suave", não real**: o conteúdo de hexágonos não explorados
