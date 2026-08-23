@@ -1,9 +1,9 @@
 /**
- * GM-only directory of every authored hex in the currently viewed scene:
- * a searchable list to read a hex's content at a glance without hunting
- * for it on the map, jump the camera to it ("go to"), or open it in the
- * full editor - the map-scale equivalent of a Journal/Actor sidebar tab,
- * scoped to this module's own data.
+ * GM-only dashboard over every authored hex in the currently viewed scene:
+ * aggregate stats, filters, and a searchable table to read/act on hex
+ * content at a glance without hunting for it on the map - the map-scale
+ * equivalent of a Journal/Actor sidebar tab, scoped to this module's own
+ * data. Replaces the earlier plain "Hex Directory".
  *
  * Reads the *raw* (un-gated) hex content via data-model's
  * normalizeHexContent() directly, not fog.js's getEffectiveContent() -
@@ -11,10 +11,9 @@
  * toolbar button that opens it), so there is nothing to hide from its own
  * user.
  *
- * "Dynamic" per the request that prompted this: the list re-renders itself
- * on both a hex-data change in the viewed scene (updateScene) and a scene
- * switch (canvasReady), so it never goes stale while left open - no manual
- * refresh button needed.
+ * "Dynamic": the list re-renders itself on both a hex-data change in the
+ * viewed scene (updateScene) and a scene switch (canvasReady), so it never
+ * goes stale while left open - no manual refresh button needed.
  */
 import { MODULE_ID, getRadius, getOrigin } from "./settings.js";
 import { parseHexKey, normalizeHexContent } from "./data-model.js";
@@ -27,15 +26,15 @@ function coordLabel(col, row) {
   return `${String(row).padStart(2, "0")}.${String(col).padStart(2, "0")}`;
 }
 
-export class HexDirectory extends HandlebarsApplicationMixin(ApplicationV2) {
+export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
-    id: "hex-chronicle-directory",
-    window: { title: "HEXCHRON.DirectoryTitle", icon: "fa-solid fa-table-list", resizable: true, contentClasses: ["hex-chronicle-directory"] },
-    position: { width: 480, height: 640 },
+    id: "hex-chronicle-overview",
+    window: { title: "HEXCHRON.OverviewTitle", icon: "fa-solid fa-chart-simple", resizable: true, contentClasses: ["hex-chronicle-overview"] },
+    position: { width: 560, height: 680 },
   };
 
   static PARTS = {
-    body: { template: `modules/${MODULE_ID}/templates/hex-directory.hbs`, scrollable: [".hc-directory-list"] },
+    body: { template: `modules/${MODULE_ID}/templates/hex-overview.hbs`, scrollable: [".hc-overview-list"] },
   };
 
   #hooks = [];
@@ -55,7 +54,7 @@ export class HexDirectory extends HandlebarsApplicationMixin(ApplicationV2) {
         const { col, row } = parseHexKey(key);
         const content = normalizeHexContent(data);
         const mixed = content.terrain.mixed.map((m) => m.type).join(", ");
-        const search = [coordLabel(col, row), content.terrain.type, mixed, content.alt, content.icon, content.zone.join(" ")]
+        const search = [coordLabel(col, row), content.terrain.type, mixed, content.alt, content.icon, content.zone.join(" "), content.notes]
           .join(" ")
           .toLowerCase();
         return {
@@ -111,12 +110,12 @@ export class HexDirectory extends HandlebarsApplicationMixin(ApplicationV2) {
   #applyFilter(text) {
     const query = text.trim().toLowerCase();
     let visible = 0;
-    for (const row of this.element.querySelectorAll(".hc-directory-row")) {
+    for (const row of this.element.querySelectorAll(".hc-overview-row")) {
       const match = !query || (row.dataset.search ?? "").includes(query);
       row.hidden = !match;
       if (match) visible++;
     }
-    const empty = this.element.querySelector(".hc-directory-no-matches");
+    const empty = this.element.querySelector(".hc-overview-no-matches");
     if (empty) empty.hidden = visible > 0;
   }
 }
