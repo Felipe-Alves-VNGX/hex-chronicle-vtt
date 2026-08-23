@@ -328,11 +328,13 @@ Add a new import right below it:
 import { getCustomBiomes } from "./custom-registry.js";
 ```
 
-Then replace the `palette()` function:
+Then replace the `palette()` function (it already takes a `scene` parameter
+from earlier work this session - only the body changes here, to merge in
+custom biome colors before the existing override):
 
 ```js
-export function palette() {
-  const override = getPaletteOverride();
+export function palette(scene = canvas.scene) {
+  const override = getPaletteOverride(scene);
   return {
     terrain: { ...DEFAULT_TERRAIN_COLORS, ...(override.terrain ?? {}) },
     zone: { ...DEFAULT_ZONE_COLORS, ...(override.zone ?? {}) },
@@ -357,7 +359,9 @@ export function palette(scene = canvas.scene) {
 }
 ```
 
-(This also fixes `palette()` to accept an explicit `scene` the same way every other `settings.js` getter already does, so a scene's own palette override still wins over a custom biome's default color - custom biomes are a "define a new type" mechanism, not a way around per-scene overrides.)
+(A scene's own palette override still wins over a custom biome's default
+color - custom biomes are a "define a new type" mechanism, not a way around
+per-scene overrides.)
 
 - [ ] **Step 3: Syntax-check**
 
@@ -1120,6 +1124,9 @@ Then update each tool definition inside `getSceneControlButtons`'s `tools: { ...
         icon: "fa-solid fa-swatchbook",
         toggle: true,
         active: false,
+        // Visible to everyone - the panel itself only shows zones to the GM
+        // (see hex-legend.js), but the terrain color key is useful for
+        // players reading the map too.
         onChange: (event, active) => toggleLegend(active),
       },
 ```
@@ -1194,6 +1201,9 @@ becomes:
         toggle: true,
         active: false,
         visible: isToolVisibleOnScene("legend"),
+        // Visible to everyone - the panel itself only shows zones to the GM
+        // (see hex-legend.js), but the terrain color key is useful for
+        // players reading the map too.
         onChange: (event, active) => toggleLegend(active),
       },
 ```
