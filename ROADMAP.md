@@ -203,7 +203,8 @@ tocar na cena compartilhada). Também sem bugs novos:
   mundo. Mostra só o que a cena atual realmente usa - não a paleta inteira
   do módulo - com as mesmas cores de `render.js#palette()`. Zonas só
   aparecem pro GM (mesma regra do mapa: contorno de zona nunca é desenhado
-  pra não-GM). Não é uma janela ApplicationV2, é um painel HTML simples
+  pra não-GM, exceto quando o GM ativa o toggle por cena que permite
+  mostrá-las pra jogadores também). Não é uma janela ApplicationV2, é um painel HTML simples
   fixado num canto (`position:fixed`, canto inferior esquerdo, entre a
   barra de ferramentas e a hotbar - único espaço livre no layout padrão do
   v13). Também "dinâmico": reconstrói sozinho em `updateScene`/`canvasReady`
@@ -405,6 +406,8 @@ do `data-group` real de uma aba existente em vez de assumir um nome fixo):
 - **A ferramenta "Ver Hexágono" (não-GM) ainda não faz nada** - clicar não
   abre nenhuma visualização somente-leitura. Pendente desde o início do
   port, baixa prioridade.
-- Zonas (fronteiras tracejadas) só aparecem pro GM - podem revelar a forma de
-  uma área secreta antes da hora, e não há um "desconhecido" equivalente pra
-  esconder isso de jogadores.
+- Zonas (fronteiras tracejadas) só aparecem pro GM por padrão - podem revelar
+  a forma de uma área secreta antes da hora, e não há um "desconhecido"
+  equivalente pra esconder isso de jogadores. Existe agora um toggle por cena
+  ("mostrar contornos de zona pra jogadores") que permite ao GM optar por
+  exibi-las mesmo assim quando isso não for um problema.

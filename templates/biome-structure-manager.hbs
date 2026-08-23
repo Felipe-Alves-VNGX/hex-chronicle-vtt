@@ -41,7 +41,7 @@
     </div>
 
     <div class="hc-registry-add">
-      <input type="text" name="newStructureName" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
+      <input type="text" name="newStructureName" value="{{newStructureName}}" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
       <button type="button" data-action="chooseStructureImage">{{localize "HEXCHRON.RegistryChooseImage"}}</button>
       {{#if newStructurePath}}
       <img class="hc-registry-icon-preview" src="{{newStructurePath}}" alt="" />

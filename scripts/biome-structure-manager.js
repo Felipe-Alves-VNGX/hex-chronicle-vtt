@@ -45,6 +45,7 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
   };
 
   #newStructurePath = "";
+  #newStructureName = "";
 
   async _prepareContext() {
     return {
@@ -53,6 +54,7 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
       builtinStructures: BUILDING_ICONS,
       customStructures: Object.entries(getCustomStructures()).map(([slug, structure]) => ({ slug, ...structure })),
       newStructurePath: this.#newStructurePath,
+      newStructureName: this.#newStructureName,
     };
   }
 
@@ -74,6 +76,12 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
     }
 
     this.element.querySelector('[data-action="chooseStructureImage"]')?.addEventListener("click", () => {
+      // Stash the currently-typed name before opening the picker - this.render()
+      // in the callback below rebuilds the whole template from _prepareContext(),
+      // and the name input isn't otherwise round-tripped through it (only the
+      // path is), so without this the re-render would silently wipe out
+      // whatever the GM had already typed.
+      this.#newStructureName = this.element.querySelector('input[name="newStructureName"]').value;
       const FilePickerImpl = getFilePickerImpl();
       new FilePickerImpl({
         type: "image",
@@ -89,6 +97,7 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
       const slug = await addCustomStructure(nameInput.value, this.#newStructurePath, BUILDING_ICONS);
       if (slug) {
         this.#newStructurePath = "";
+        this.#newStructureName = "";
         this.render();
       }
     });

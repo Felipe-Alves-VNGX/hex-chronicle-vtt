@@ -4,11 +4,12 @@
  * stacked bottom-to-top exactly like the original's layer order (content,
  * then grid, then coordinate numbers, then zone boundaries on top).
  *
- * Zone boundaries (dashed cluster outlines) are GM-only: they can leak the
- * shape of a secret area to players before they've explored it, and unlike
- * terrain they have no "unknown" fallback that hides that shape - so v1
- * simply never draws them for non-GM users. Revisit if the campaign wants
- * players to see zone outlines.
+ * Zone boundaries (dashed cluster outlines) are GM-only by default: they can
+ * leak the shape of a secret area to players before they've explored it, and
+ * unlike terrain they have no "unknown" fallback that hides that shape. A
+ * GM who wants players to see them anyway can opt in per-scene via the
+ * "show zone outlines to players" toggle on the Hex Chronicle Scene Config
+ * tab (see isZoneVisibleToPlayers() in settings.js).
  */
 import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber, getGridStyle, isZoneVisibleToPlayers } from "./settings.js";
 import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
@@ -55,6 +56,19 @@ const ROAD_COLOR = 0x8b5a2b;
 const RIVER_COLOR = 0x3a7ca5;
 
 const textureCache = new Map();
+
+/** Drops any cached `custom:`-prefixed texture entries. Called from
+ * custom-registry.js's `customStructures` onChange, before it refreshes the
+ * canvas - otherwise deleting a custom structure and later re-adding one
+ * with the same name (same slug, different image) would keep serving the
+ * old cached texture for that slug forever, since the cache key doesn't
+ * change. Exported instead of the raw Map so textureCache stays private to
+ * this module. */
+export function invalidateCustomStructureTextures() {
+  for (const key of textureCache.keys()) {
+    if (key.startsWith("custom:")) textureCache.delete(key);
+  }
+}
 
 /** Exposed so the hex editor's visual terrain-brush diagram (hex-diagram.js)
  * paints with the exact same colors (including any world palette override)
@@ -126,10 +140,14 @@ async function getIconTexture(iconPath) {
     ? getCustomStructures()[iconPath.slice(7)]?.path
     : `modules/${MODULE_ID}/assets/icons/${iconPath}.svg`;
   if (!url) {
-    // The custom structure this hex references was deleted from the
-    // registry since the hex was authored - same "missing icon" tolerance
-    // as a bad built-in filename below, just caught before trying to load
-    // anything.
+    // Defensive fallback, not the normal "GM deleted a custom structure"
+    // path: data-model.js#resolveIcon() only ever emits a `custom:` prefix
+    // when the structure IS currently in the registry, so a hex referencing
+    // a since-deleted custom structure actually falls through to the plain
+    // building/<slug>.svg 404 handled in the catch below instead. This just
+    // guards against a `custom:`-prefixed path whose registry entry is
+    // missing anyway (e.g. resolveIcon()'s logic changing, or hand-edited
+    // flag data).
     console.warn(`${MODULE_ID} | custom structure not found: ${iconPath}`);
     textureCache.set(iconPath, null);
     return null;
@@ -184,6 +202,11 @@ export async function renderHexes(container, scene, { isGM }) {
 
   const radius = getRadius(scene);
   const origin = getOrigin(scene);
+  // Computed once per render pass rather than inside drawGrid() itself -
+  // it's the same scene-flag read + color-string parse for every hex in
+  // the loop below, and on a large map that's hundreds of redundant reads
+  // for an answer that never changes within one render.
+  const gridStyle = getGridStyle(scene);
   const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
   const hexes = new Map(Object.entries(raw).map(([k, v]) => [k, normalizeHexContent(v)]));
 
@@ -220,7 +243,7 @@ export async function renderHexes(container, scene, { isGM }) {
 
   for (const [key, content] of effectiveByKey) {
     const { col, row } = parseHexKey(key);
-    drawGrid(gridLayer, col, row, radius, origin, scene);
+    drawGrid(gridLayer, col, row, radius, origin, gridStyle);
     drawContent(contentLayer, col, row, radius, origin, content, scene);
     drawNumber(numbersLayer, col, row, radius, origin);
   }
@@ -230,8 +253,7 @@ export async function renderHexes(container, scene, { isGM }) {
   }
 }
 
-function drawGrid(graphics, col, row, radius, origin, scene) {
-  const style = getGridStyle(scene);
+function drawGrid(graphics, col, row, radius, origin, style) {
   if (style.lineType === "none") return;
   const pts = hexShapePoints(col, row, radius, origin);
   const width = Math.max(1, style.width ?? radius / 20);

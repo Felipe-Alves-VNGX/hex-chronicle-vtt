@@ -12,6 +12,7 @@
  * them back would be circular.
  */
 import { MODULE_ID } from "./settings.js";
+import { invalidateCustomStructureTextures } from "./render.js";
 
 export function registerCustomRegistrySettings() {
   game.settings.register(MODULE_ID, "customBiomes", {
@@ -27,7 +28,14 @@ export function registerCustomRegistrySettings() {
     config: false,
     type: Object,
     default: {},
-    onChange: () => canvas.hexChronicle?.refresh(),
+    onChange: () => {
+      // A deleted-then-re-added custom structure re-uses the same slug (and
+      // therefore the same `custom:<slug>` cache key) if it has the same
+      // name, but a different image - drop any stale cached texture for it
+      // before refreshing, or the old image keeps rendering forever.
+      invalidateCustomStructureTextures();
+      canvas.hexChronicle?.refresh();
+    },
   });
 }
 

@@ -14,7 +14,9 @@
  */
 import { MODULE_ID, getSceneOverrides, isModuleEnabledOnScene } from "./settings.js";
 
-Handlebars.registerHelper("eq", (a, b) => a === b);
+// Prefixed to avoid colliding with another module's (or a future Foundry
+// core) generic "eq" helper - Handlebars helpers are registered globally.
+Handlebars.registerHelper("hcEq", (a, b) => a === b);
 
 const TAB_NAME = "hexChronicle";
 

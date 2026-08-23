@@ -143,10 +143,10 @@
     <label>{{localize "HEXCHRON.SettingGridLineType"}}</label>
     <div class="form-fields">
       <select name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.lineType">
-        <option value="solid" {{#if (eq gridStyle.lineType "solid")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeSolid"}}</option>
-        <option value="dashed" {{#if (eq gridStyle.lineType "dashed")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDashed"}}</option>
-        <option value="dotted" {{#if (eq gridStyle.lineType "dotted")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDotted"}}</option>
-        <option value="none" {{#if (eq gridStyle.lineType "none")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeNone"}}</option>
+        <option value="solid" {{#if (hcEq gridStyle.lineType "solid")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeSolid"}}</option>
+        <option value="dashed" {{#if (hcEq gridStyle.lineType "dashed")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDashed"}}</option>
+        <option value="dotted" {{#if (hcEq gridStyle.lineType "dotted")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDotted"}}</option>
+        <option value="none" {{#if (hcEq gridStyle.lineType "none")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeNone"}}</option>
       </select>
     </div>
   </div>
