@@ -36,7 +36,7 @@
  */
 import { isValidZone, isValidPathAnchor, normalizeCardinal } from "./geometry.js";
 import { MODULE_ID } from "./settings.js";
-import { getCustomBiomes } from "./custom-registry.js";
+import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
 
 /** The original 7-token vocabulary (N/NE/SE/S/SW/NW/C), kept forever valid
  * for reading - old hex data, hand-typed text, and imported files all still
@@ -176,7 +176,9 @@ export function stripStructure(content) {
 /** Derives which icon (if any) should be drawn in the hex center, matching
  * the original priority: explicit building icon > center-zone terrain icon. */
 export function resolveIcon(content) {
-  if (content.icon) return `building/${content.icon}`;
+  if (content.icon) {
+    return getCustomStructures()[content.icon] ? `custom:${content.icon}` : `building/${content.icon}`;
+  }
   const centerTerrain = content.terrain.mixed.find((m) => m.sides.some((s) => s.startsWith("C")));
   const terrainType = centerTerrain ? centerTerrain.type : content.terrain.type;
   return terrainType ? `terrain/${terrainType}` : null;

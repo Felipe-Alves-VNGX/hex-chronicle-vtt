@@ -11,7 +11,7 @@
  * players to see zone outlines.
  */
 import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber } from "./settings.js";
-import { getCustomBiomes } from "./custom-registry.js";
+import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
 import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
@@ -123,7 +123,18 @@ function strokeDashedPolyline(graphics, points, { color, width, dash = 15, gap =
 
 async function getIconTexture(iconPath) {
   if (textureCache.has(iconPath)) return textureCache.get(iconPath);
-  const url = `modules/${MODULE_ID}/assets/icons/${iconPath}.svg`;
+  const url = iconPath.startsWith("custom:")
+    ? getCustomStructures()[iconPath.slice(7)]?.path
+    : `modules/${MODULE_ID}/assets/icons/${iconPath}.svg`;
+  if (!url) {
+    // The custom structure this hex references was deleted from the
+    // registry since the hex was authored - same "missing icon" tolerance
+    // as a bad built-in filename below, just caught before trying to load
+    // anything.
+    console.warn(`${MODULE_ID} | custom structure not found: ${iconPath}`);
+    textureCache.set(iconPath, null);
+    return null;
+  }
   try {
     const texture = await PIXI.Assets.load(url);
     // A 404 for an .svg asset doesn't always make PIXI.Assets.load() reject -
