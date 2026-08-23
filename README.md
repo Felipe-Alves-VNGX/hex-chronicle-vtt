@@ -17,7 +17,7 @@ still planned.
 > the actual UI. Every canvas tool, the visual hex editor (terrain/roads/
 > rivers diagrams, icon picker with preview), bulk import (including
 > negative coordinates and French cardinal aliases), fog-of-war in both
-> layers, the hex directory, the on-screen legend, and the grid-alignment
+> layers, the hex overview, the on-screen legend, and the grid-alignment
 > drag handles have all been exercised live, GM and player perspectives
 > both checked where relevant. See [ROADMAP.md](ROADMAP.md) for the
 > detailed, dated history of what was tested and what each round found.
@@ -219,3 +219,20 @@ real v13 or v14 world:
 7. Set a hex's link to a Journal Entry (drag one from the sidebar onto the
    editor field) and confirm both GM and player can open it with "Open
    Link" once the hex/structure is visible to them.
+8. Open Hex Overview from the toolbar and confirm its stats/counts match
+   what's actually authored on the scene.
+9. Filter by terrain, by zone, and by each tri-state toggle; confirm the
+   row count and the "no matches" state behave correctly, and that filters
+   survive a re-render triggered by an edit elsewhere.
+10. Edit a hex's label and notes inline from Hex Overview; confirm it
+    persists (reload the scene) and matches what the full "Edit Hex" form
+    shows for that hex.
+11. Add and remove a zone tag inline on one hex from Hex Overview.
+12. Select several hexes in Hex Overview and run each bulk action (reveal/
+    hide terrain, reveal/hide structure, add/remove zone tag); confirm
+    exactly one scene update per action (watch dev tools) and that the
+    affected hexes' state is correct afterward, for both GM and a
+    connected player client where relevant (terrain/structure reveal).
+13. Confirm a hex's notes never appear anywhere in player-facing rendering
+    (canvas draw, legend) - Hex Overview and "Edit Hex" are the only
+    GM-only surfaces that show them.

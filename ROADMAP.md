@@ -309,8 +309,12 @@ Substituição do Hex Directory (lista pesquisável) por Hex Overview
   em todos os hexes da cena num relance.
 - **Filtros combináveis**: terreno, zona, notas e link - refinam a tabela em
   tempo real sem recarregar.
-- **Edição inline rápida**: clique no rótulo/notas/zona de um hex pra editar
-  direto, sem abrir o formulário completo.
+- **Edição inline rápida**: clique no rótulo ou nas notas de um hex pra
+  editar direto, sem abrir o formulário completo.
+- **Zona-tag por prompt rápido**: adicione ou remova uma zona-tag de um hex
+  direto na tabela via um `window.prompt()`, sem abrir o editor completo
+  (não é edição inline como rótulo/notas, mas evita o formulário completo
+  mesmo assim).
 - **Toggles por linha**: revelar/ocultar terreno ou estrutura por hex
   individual, ou via seleção múltipla (ver próximo ponto).
 - **Ações em lote**: selecione múltiplas linhas, depois revele/oculte terreno

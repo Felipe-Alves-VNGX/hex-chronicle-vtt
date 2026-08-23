@@ -49,7 +49,11 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}`)) this.render();
   };
 
-  #onCanvasReady = () => this.render();
+  #onCanvasReady = () => {
+    this.#selected.clear();
+    this.#filters = { text: "", terrain: "", zoneTag: "", hasNotes: "any", hasLink: "any" };
+    this.render();
+  };
 
   async _prepareContext() {
     const scene = canvas.scene;
@@ -243,11 +247,11 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     const col = Number(cell.dataset.col);
     const row = Number(cell.dataset.row);
     const field = cell.dataset.field;
-    const original = cell.dataset.tooltip ?? "";
+    const original = cell.dataset.value ?? "";
     const originalHtml = cell.innerHTML;
 
     const textarea = document.createElement("textarea");
-    textarea.value = field === "notes" ? original : (cell.querySelector(".hc-overview-alt")?.textContent ?? "");
+    textarea.value = original;
     textarea.rows = field === "notes" ? 3 : 1;
     textarea.className = "hc-overview-inline-editor";
     cell.innerHTML = "";
@@ -257,6 +261,12 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     const commit = async () => {
       const scene = canvas.scene;
       await applyHexPatches(scene, [{ col, row, patch: { [field]: textarea.value } }]);
+      // Don't rely solely on the updateScene hook: a no-op edit (value
+      // unchanged) may produce no diff, so the hook never fires and the
+      // textarea would otherwise be left stuck open. Foundry's
+      // ApplicationV2 coalesces overlapping renders, so this is safe even
+      // if the hook also triggers one.
+      this.render();
     };
     const cancel = () => {
       cell.innerHTML = originalHtml;
@@ -362,9 +372,18 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
       const matchesLink = hasLink === "any" || (hasLink === "yes") === (row.dataset.hasLink === "true");
       const match = matchesText && matchesTerrain && matchesZone && matchesNotes && matchesLink;
       row.hidden = !match;
-      if (match) visible++;
+      if (match) {
+        visible++;
+      } else {
+        const box = row.querySelector('[data-action="select"]');
+        if (box) {
+          const key = `${box.dataset.col},${box.dataset.row}`;
+          if (this.#selected.delete(key)) box.checked = false;
+        }
+      }
     }
     const empty = this.element.querySelector(".hc-overview-no-matches");
     if (empty) empty.hidden = visible > 0;
+    this.#updateBulkBar();
   }
 }

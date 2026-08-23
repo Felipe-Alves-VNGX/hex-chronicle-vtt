@@ -2,7 +2,7 @@
  * The interactive canvas overlay. Registered into CONFIG.Canvas.layers
  * (see init.js) under the key "hexChronicle", with its own scene-control
  * group. Most of that group's tools are one-shot dialogs/toggles handled
- * entirely in init.js (import, reset fog, the hex directory, the legend);
+ * entirely in init.js (import, reset fog, the hex overview, the legend);
  * this layer only owns the tools that need direct canvas interaction:
  * edit a hex's content (GM), reveal/hide a hex's terrain (GM), reveal/hide
  * a hex's structure (GM), open a hex's linked Journal/Scene (everyone,
@@ -126,7 +126,7 @@ export class HexChronicleLayer extends InteractionLayerBase {
    * the hover outline so it reads as "the camera just centered here" rather
    * than "your cursor is here". Works even while this layer isn't the
    * active control (the graphics object is always present - only pointer
-   * event handling is gated by activation) - used by the hex directory's
+   * event handling is gated by activation) - used by the hex overview's
    * "go to" button so a GM gets visual confirmation of where the camera
    * jumped to. */
   flashHex(col, row, duration = 1200) {
