@@ -8,10 +8,11 @@
  * for a custom/hand-typed icon that isn't in this list.
  */
 import { MODULE_ID } from "./settings.js";
+import { getCustomStructures } from "./custom-registry.js";
 
 // Matches assets/icons/building/*.svg exactly - keep in sync if icons are
 // added or removed there.
-const BUILDING_ICONS = [
+export const BUILDING_ICONS = [
   "capitale", "cavaliers", "chevaucheurs", "fort", "fortin", "mages",
   "nains", "observatoire", "pont", "portail", "ruines", "sidhes",
   "temple", "village",
@@ -27,23 +28,29 @@ export function attachIconPicker(root, { input }) {
 
   const swatches = [];
 
-  function makeSwatch(name) {
+  /** `key` is what actually gets written into the hex's `icon` field - a
+   * bare filename for a built-in (resolved as `building/<key>.svg`) or a
+   * custom structure's slug (resolved through the registry, see
+   * data-model.js#resolveIcon). `label`/`src` override the tooltip/image
+   * for a custom entry, whose real name and image path aren't derivable
+   * from the key alone the way a built-in's are. */
+  function makeSwatch(key, { label, src } = {}) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hc-icon-swatch";
-    btn.dataset.icon = name;
-    btn.dataset.tooltip = name || game.i18n.localize("HEXCHRON.IconNone");
-    if (name) {
+    btn.dataset.icon = key;
+    btn.dataset.tooltip = label ?? (key || game.i18n.localize("HEXCHRON.IconNone"));
+    if (key) {
       const img = document.createElement("img");
-      img.src = `modules/${MODULE_ID}/assets/icons/building/${name}.svg`;
-      img.alt = name;
+      img.src = src ?? `modules/${MODULE_ID}/assets/icons/building/${key}.svg`;
+      img.alt = label ?? key;
       btn.appendChild(img);
     } else {
       btn.classList.add("hc-icon-none");
       btn.innerHTML = '<i class="fa-solid fa-ban"></i>';
     }
     btn.addEventListener("click", () => {
-      input.value = input.value.trim() === name ? "" : name;
+      input.value = input.value.trim() === key ? "" : key;
       input.dispatchEvent(new Event("input", { bubbles: true }));
     });
     swatches.push(btn);
@@ -52,6 +59,9 @@ export function attachIconPicker(root, { input }) {
 
   makeSwatch("");
   for (const name of BUILDING_ICONS) makeSwatch(name);
+  for (const [slug, structure] of Object.entries(getCustomStructures())) {
+    makeSwatch(slug, { label: structure.name, src: structure.path });
+  }
 
   function updateActive() {
     const current = input.value.trim();
