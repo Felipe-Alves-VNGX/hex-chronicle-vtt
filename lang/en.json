@@ -19,6 +19,7 @@
     "OverviewColCoord": "Hex",
     "OverviewColTerrain": "Terrain",
     "OverviewColLabel": "Label",
+    "OverviewColRevealed": "Revealed",
     "OverviewGoto": "Go to hex",
     "OverviewEmpty": "No hexes authored on this scene yet.",
     "OverviewNoMatches": "No hexes match this search.",

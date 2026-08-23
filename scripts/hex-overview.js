@@ -19,6 +19,7 @@ import { MODULE_ID, getRadius, getOrigin } from "./settings.js";
 import { parseHexKey, normalizeHexContent } from "./data-model.js";
 import { tileCenter } from "./geometry.js";
 import { HexEditor } from "./hex-editor.js";
+import { isExplored, toggleHex, isStructureRevealed, toggleStructure } from "./fog.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -73,6 +74,8 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
           zoneKey: content.zone.join("|"),
           hasLink: !!content.link,
           hasNotes: !!content.notes,
+          terrainRevealed: isExplored(col, row, scene),
+          structureRevealed: isStructureRevealed(col, row, scene),
           search,
         };
       })
@@ -123,6 +126,18 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     for (const btn of this.element.querySelectorAll('[data-action="edit"]')) {
       btn.addEventListener("click", () => new HexEditor({ col: Number(btn.dataset.col), row: Number(btn.dataset.row) }).render(true));
+    }
+    for (const btn of this.element.querySelectorAll('[data-action="toggleTerrain"]')) {
+      btn.addEventListener("click", async () => {
+        await toggleHex(Number(btn.dataset.col), Number(btn.dataset.row));
+        await canvas.hexChronicle?.refresh();
+      });
+    }
+    for (const btn of this.element.querySelectorAll('[data-action="toggleStructure"]')) {
+      btn.addEventListener("click", async () => {
+        await toggleStructure(Number(btn.dataset.col), Number(btn.dataset.row));
+        await canvas.hexChronicle?.refresh();
+      });
     }
 
     const search = this.element.querySelector('input[name="search"]');

@@ -43,6 +43,7 @@
           <th class="hc-overview-col-coord">{{localize "HEXCHRON.OverviewColCoord"}}</th>
           <th>{{localize "HEXCHRON.OverviewColTerrain"}}</th>
           <th>{{localize "HEXCHRON.OverviewColLabel"}}</th>
+          <th>{{localize "HEXCHRON.OverviewColRevealed"}}</th>
           <th class="hc-overview-col-actions"></th>
         </tr>
       </thead>
@@ -59,6 +60,14 @@
             {{#if this.alt}}<span class="hc-overview-alt">{{this.alt}}</span>{{/if}}
             {{#if this.icon}}<i class="fa-solid fa-tower-observation" data-tooltip="{{this.icon}}"></i>{{/if}}
             {{#if this.hasLink}}<i class="fa-solid fa-link" data-tooltip="{{localize 'HEXCHRON.FieldLink'}}"></i>{{/if}}
+          </td>
+          <td class="hc-overview-revealed">
+            <button type="button" class="hc-overview-reveal-toggle {{#if this.terrainRevealed}}active{{/if}}" data-action="toggleTerrain" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.ToolReveal'}}">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button type="button" class="hc-overview-reveal-toggle {{#if this.structureRevealed}}active{{/if}}" data-action="toggleStructure" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.ToolRevealStructure'}}">
+              <i class="fa-solid fa-tower-observation"></i>
+            </button>
           </td>
           <td class="hc-overview-actions">
             <button type="button" data-action="goto" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.OverviewGoto'}}">
