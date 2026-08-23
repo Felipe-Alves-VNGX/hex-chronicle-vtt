@@ -55,6 +55,12 @@ async function onRenderSceneConfig(app, element) {
       override: !!overrides.palette?.override,
       json: overrides.palette?.json ?? game.settings.get(MODULE_ID, "paletteOverride"),
     },
+    tools: Object.fromEntries(
+      ["edit", "reveal", "revealStructure", "open", "align", "import", "resetFog", "overview", "legend"].map((name) => [
+        name,
+        overrides.tools?.[name] ?? true,
+      ])
+    ),
   };
 
   const renderTemplate = foundry.applications?.handlebars?.renderTemplate ?? globalThis.renderTemplate;

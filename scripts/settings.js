@@ -77,6 +77,15 @@ export function isModuleEnabledOnScene(scene = canvas.scene) {
   return value ?? true;
 }
 
+/** Per-tool visibility override for one scene's toolbar group (see the
+ * "Hex Chronicle" Scene Config tab). Absent flag, or the whole
+ * `sceneOverrides.tools` object absent, means visible - matches every
+ * tool's previous always-available-when-the-group-is-visible behavior. */
+export function isToolVisibleOnScene(name, scene = canvas.scene) {
+  const tools = getSceneOverrides(scene).tools;
+  return tools?.[name] ?? true;
+}
+
 export function getRadius(scene = canvas.scene) {
   const grid = getSceneOverrides(scene).grid;
   if (grid?.override && typeof grid.hexRadius === "number") return grid.hexRadius;

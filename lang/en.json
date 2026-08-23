@@ -106,6 +106,7 @@
     "SceneOverrideGrid": "Grid position & size",
     "SceneOverrideAutoReveal": "Auto-reveal",
     "SceneOverridePalette": "Color palette",
+    "SceneOverrideTools": "Toolbar tools visible on this scene",
     "RegistryInvalidName": "Enter a name (letters/numbers only after simplification).",
     "RegistryDuplicateKey": "\"{slug}\" already exists as a built-in or custom entry.",
     "RegistryMissingImage": "Choose an image for this structure first.",

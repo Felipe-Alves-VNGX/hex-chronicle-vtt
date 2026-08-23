@@ -1,4 +1,4 @@
-import { MODULE_ID, registerSettings, isModuleEnabledOnScene } from "./settings.js";
+import { MODULE_ID, registerSettings, isModuleEnabledOnScene, isToolVisibleOnScene } from "./settings.js";
 import { HexChronicleLayer } from "./layer.js";
 import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
@@ -93,36 +93,38 @@ Hooks.on("getSceneControlButtons", (controls) => {
         name: "edit",
         title: game.user.isGM ? "HEXCHRON.ToolEdit" : "HEXCHRON.ToolView",
         icon: "fa-solid fa-pen",
+        visible: isToolVisibleOnScene("edit"),
       },
       reveal: {
         name: "reveal",
         title: "HEXCHRON.ToolReveal",
         icon: "fa-solid fa-eye",
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("reveal"),
       },
       revealStructure: {
         name: "revealStructure",
         title: "HEXCHRON.ToolRevealStructure",
         icon: "fa-solid fa-tower-observation",
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("revealStructure"),
       },
       open: {
         name: "open",
         title: "HEXCHRON.ToolOpen",
         icon: "fa-solid fa-link",
+        visible: isToolVisibleOnScene("open"),
       },
       align: {
         name: "align",
         title: "HEXCHRON.ToolAlign",
         icon: "fa-solid fa-crosshairs",
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("align"),
       },
       import: {
         name: "import",
         title: "HEXCHRON.ToolImport",
         icon: "fa-solid fa-file-import",
         button: true,
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("import"),
         onChange: () => openImportDialog(),
       },
       resetFog: {
@@ -130,7 +132,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
         title: "HEXCHRON.ToolResetFog",
         icon: "fa-solid fa-broom",
         button: true,
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("resetFog"),
         onChange: () => confirmResetFog(),
       },
       overview: {
@@ -138,7 +140,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
         title: "HEXCHRON.ToolOverview",
         icon: "fa-solid fa-chart-simple",
         button: true,
-        visible: game.user.isGM,
+        visible: game.user.isGM && isToolVisibleOnScene("overview"),
         onChange: () => {
           if (hexOverviewApp?.rendered) hexOverviewApp.bringToFront();
           else {
@@ -153,6 +155,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
         icon: "fa-solid fa-swatchbook",
         toggle: true,
         active: false,
+        visible: isToolVisibleOnScene("legend"),
         // Visible to everyone - the panel itself only shows zones to the GM
         // (see hex-legend.js), but the terrain color key is useful for
         // players reading the map too.
