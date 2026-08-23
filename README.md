@@ -12,17 +12,32 @@ from the same file format. See [CREDITS.md](CREDITS.md) for full attribution
 js-yaml library), and [ROADMAP.md](ROADMAP.md) for what's done and what's
 still planned.
 
-> **Status**: verified against a real Foundry v13 (Build 351) world as of
-> v0.2.3. Confirmed working: the module loads and the layer registers with
-> no errors, the Hex Chronicle scene-controls tab activates the layer, all
-> four canvas-click tools (Edit, Reveal Terrain, Reveal Structure, Open
-> Link) resolve the right hex and do the right thing, the editor form
-> renders and saves correctly, and a scene with zero hexes now shows a
-> starter grid instead of nothing. Not yet click-tested live: mixed terrain
-> rendering, road/river curves, zone boundary dashing, and bulk import -
-> these go through the same rendering/data-model code paths already
-> exercised, but haven't been eyeballed directly. See "Verifying this
-> build" below if you want to confirm them yourself.
+> **Status**: extensively live-tested against a real Foundry v13 world,
+> as both GM and player, across many sessions - not just the code paths,
+> the actual UI. Every canvas tool, the visual hex editor (terrain/roads/
+> rivers diagrams, icon picker with preview), bulk import (including
+> negative coordinates and French cardinal aliases), fog-of-war in both
+> layers, the hex directory, the on-screen legend, and the grid-alignment
+> drag handles have all been exercised live, GM and player perspectives
+> both checked where relevant. See [ROADMAP.md](ROADMAP.md) for the
+> detailed, dated history of what was tested and what each round found.
+
+## What's here
+
+- A hex grid overlaid directly on a Scene, independent of Foundry's own
+  grid settings - position and size it by eye with drag handles, or type
+  exact numbers.
+- A visual per-hex editor: paint mixed terrain and draw roads/rivers by
+  clicking a diagram of the hex instead of writing `type: side1 side2`
+  text by hand, and pick a building icon from a preview grid instead of
+  typing a filename. The original text fields still work too, behind a
+  collapsed "Edit as text" fallback.
+- Two independent fog-of-war layers (terrain, and separately its
+  building/label/link), manual or automatic reveal.
+- A searchable directory to jump straight to any authored hex, and an
+  on-screen terrain/zone color legend.
+- Bulk import from the original hex-chronicle tool's `.md`/`.yaml`/`.yml`
+  files.
 
 ## Installing
 
@@ -60,24 +75,63 @@ workflow, not by hand.
 
 ## Usage
 
-- A new **Hex Chronicle** control group appears in the scene controls
-  (left toolbar) when a scene is active.
-- **Edit Hex** (GM only): click a hex cell to open its editor - terrain
-  type, mixed terrain overrides, building icon, label, roads, rivers, and
-  zones. See the field hints in the form; the metadata mirrors the original
-  Markdown frontmatter format field-for-field.
-- **Reveal/Hide Terrain** (GM only): click a hex to toggle whether players
-  can see its terrain at all (see "Exploration / fog-of-war" below).
-- **Reveal/Hide Structure** (GM only): click a hex to toggle whether its
+A new **Hex Chronicle** control group appears in the scene controls (left
+toolbar) when a scene is active. Hovering the canvas with any tool below
+selected outlines whichever hex the cursor is over, so you can see what a
+click will land on before committing to it.
+
+- **Edit Hex** (GM; does nothing yet for players - see "Known limitations"
+  in [ROADMAP.md](ROADMAP.md)): click a hex cell to open its editor -
+  terrain type, mixed terrain, building icon, label, roads, rivers, and
+  zones. Mixed terrain and roads/rivers are painted/drawn on a clickable
+  diagram of the hex (see "Fine-grained terrain zones" below); the
+  building icon is picked from a preview grid. The original line-based
+  text fields still work too, behind a collapsed "Edit as text" toggle -
+  useful for hand-editing or pasting.
+- **Reveal/Hide Terrain** (GM): click a hex to toggle whether players can
+  see its terrain at all (see "Exploration / fog-of-war" below).
+- **Reveal/Hide Structure** (GM): click a hex to toggle whether its
   building icon/label/link are visible to players, independent of terrain
   exploration (see "Exploration / fog-of-war" below).
 - **Open Link** (everyone): click a hex to open whatever Journal Entry,
   Journal page, or Scene it's linked to, subject to normal Foundry
   permissions (see "Linking hexes" below). A small dot in a hex's corner
   marks that it has a link.
-- **Import Hex Files** (GM only): pick one or more `.md` (hex-chronicle
+- **Align Grid** (GM): drag two on-canvas handles to reposition/resize the
+  hex grid instead of typing `originX`/`originY`/`hexRadius` into the
+  module settings - a red dot at the grid's origin, a blue dot to resize
+  it, with a live preview grid over the scene's background art. Only
+  writes to the settings once, when you release a handle.
+- **Import Hex Files** (GM): pick one or more `.md` (hex-chronicle
   frontmatter) or `.yaml`/`.yml` files - same format the original CLI tool
   reads - to populate the current scene in one shot.
+- **Reset Fog** (GM): clears every hex's explored state for the current
+  scene, behind a confirmation dialog - it's irreversible and affects the
+  whole party at once.
+- **Hex Directory** (GM): a searchable, live-updating list of every
+  authored hex on the current scene - jump the camera to one ("go to",
+  with a brief highlight flash) or open it straight in the editor,
+  without hunting for it on the map.
+- **Toggle Legend** (everyone): shows/hides a small on-screen panel with
+  the terrain colors and zone-position numbering actually used on the
+  current scene (zone *tags* like "secured"/"dangerous" are GM-only in
+  this panel too, matching the map itself).
+
+## Fine-grained terrain zones
+
+A hex isn't just one terrain type - "mixed terrain" lets part of a hex be
+something else (a lake in the corner of a plains hex, say), positioned by
+zone. Each hex is divided into **24 zones**: `N1`-`N12` ring the outer
+half, `C1`-`C12` ring the center half - the on-screen legend's "Zone
+positions" panel shows exactly where each number sits. Roads and rivers
+anchor to the same 12 outer positions (`N1`-`N12`) plus the single center
+point `C`.
+
+The original 7-token vocabulary (`N`/`NE`/`SE`/`S`/`SW`/`NW`/`C`) from the
+Python tool still works everywhere - typed into the text fallback, in
+imported files, in old saved hexes - and is expanded to its fine
+equivalent automatically every time it's read. Nothing needs migrating;
+a hex only starts storing the new tokens once it's next saved.
 
 ## Exploration / fog-of-war
 
@@ -131,6 +185,8 @@ open a link they haven't discovered yet.
 
 - Hex radius (px) and grid origin (X/Y) - position the hex overlay anywhere
   on the scene; it doesn't depend on the Scene's own configured grid type.
+  The **Align Grid** canvas tool (see "Usage" above) sets these two by
+  dragging instead of typing numbers here.
 - Auto-reveal on/off, and its radius in hex-rings.
 - A JSON palette override to customize terrain/zone colors, e.g.:
   `{"terrain": {"plains": "#90ee90"}, "zone": {"dangerous": "#ff0000"}}`.
