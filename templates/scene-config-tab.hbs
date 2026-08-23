@@ -130,3 +130,42 @@
     </div>
   </div>
 </fieldset>
+
+<fieldset>
+  <legend>{{localize "HEXCHRON.SceneOverrideGridStyle"}}</legend>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SceneOverrideEnable"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.override" {{checked gridStyle.override}} />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingGridLineType"}}</label>
+    <div class="form-fields">
+      <select name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.lineType">
+        <option value="solid" {{#if (eq gridStyle.lineType "solid")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeSolid"}}</option>
+        <option value="dashed" {{#if (eq gridStyle.lineType "dashed")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDashed"}}</option>
+        <option value="dotted" {{#if (eq gridStyle.lineType "dotted")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeDotted"}}</option>
+        <option value="none" {{#if (eq gridStyle.lineType "none")}}selected{{/if}}>{{localize "HEXCHRON.GridLineTypeNone"}}</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingGridColor"}}</label>
+    <div class="form-fields">
+      <input type="color" name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.color" value="{{gridStyle.color}}" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingGridWidth"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.width" value="{{gridStyle.width}}" min="1" step="1" data-dtype="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingGridOpacity"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.gridStyle.opacity" value="{{gridStyle.opacity}}" min="0" max="1" step="0.05" data-dtype="Number" />
+    </div>
+  </div>
+</fieldset>

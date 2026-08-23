@@ -10,7 +10,7 @@
  * simply never draws them for non-GM users. Revisit if the campaign wants
  * players to see zone outlines.
  */
-import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber } from "./settings.js";
+import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber, getGridStyle } from "./settings.js";
 import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
 import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
@@ -51,7 +51,6 @@ const DEFAULT_ZONE_COLORS = {
   secured: 0x3f9142,
 };
 
-const GRID_COLOR = 0x707070;
 const ROAD_COLOR = 0x8b5a2b;
 const RIVER_COLOR = 0x3a7ca5;
 
@@ -91,8 +90,8 @@ function drawHexPolygon(graphics, points, { fillColor, alpha = 1 } = {}) {
   graphics.endFill();
 }
 
-function strokeDashedPolyline(graphics, points, { color, width, dash = 15, gap = 15 }) {
-  graphics.lineStyle(width, color, 1);
+function strokeDashedPolyline(graphics, points, { color, width, dash = 15, gap = 15, alpha = 1 }) {
+  graphics.lineStyle(width, color, alpha);
   let drawing = true;
   let remaining = dash;
   for (let i = 0; i < points.length - 1; i++) {
@@ -221,7 +220,7 @@ export async function renderHexes(container, scene, { isGM }) {
 
   for (const [key, content] of effectiveByKey) {
     const { col, row } = parseHexKey(key);
-    drawGrid(gridLayer, col, row, radius, origin);
+    drawGrid(gridLayer, col, row, radius, origin, scene);
     drawContent(contentLayer, col, row, radius, origin, content, scene);
     drawNumber(numbersLayer, col, row, radius, origin);
   }
@@ -231,11 +230,22 @@ export async function renderHexes(container, scene, { isGM }) {
   }
 }
 
-function drawGrid(graphics, col, row, radius, origin) {
+function drawGrid(graphics, col, row, radius, origin, scene) {
+  const style = getGridStyle(scene);
+  if (style.lineType === "none") return;
   const pts = hexShapePoints(col, row, radius, origin);
-  graphics.lineStyle(Math.max(1, radius / 20), GRID_COLOR, 0.6);
-  const flat = pts.flatMap((p) => [p.x, p.y]);
-  graphics.drawPolygon(flat);
+  const width = Math.max(1, style.width ?? radius / 20);
+  if (style.lineType === "solid") {
+    graphics.lineStyle(width, style.color, style.opacity);
+    graphics.drawPolygon(pts.flatMap((p) => [p.x, p.y]));
+    return;
+  }
+  // "dashed"/"dotted": same segmented-stroke technique drawZones() already
+  // uses for zone boundaries below, just on the hex's own outline instead
+  // of a zone cluster's - dotted uses a short dash with a relatively large
+  // gap so it reads as dots, not dashes.
+  const [dash, gap] = style.lineType === "dotted" ? [Math.max(1, width), width * 3] : [width * 4, width * 3];
+  strokeDashedPolyline(graphics, [...pts, pts[0]], { color: style.color, width, dash, gap, alpha: style.opacity });
 }
 
 function drawContent(container, col, row, radius, origin, content, scene) {

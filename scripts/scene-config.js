@@ -14,6 +14,8 @@
  */
 import { MODULE_ID, getSceneOverrides, isModuleEnabledOnScene } from "./settings.js";
 
+Handlebars.registerHelper("eq", (a, b) => a === b);
+
 const TAB_NAME = "hexChronicle";
 
 export function registerSceneConfigTab() {
@@ -61,6 +63,13 @@ async function onRenderSceneConfig(app, element) {
         overrides.tools?.[name] ?? true,
       ])
     ),
+    gridStyle: {
+      override: !!overrides.gridStyle?.override,
+      lineType: overrides.gridStyle?.lineType ?? "solid",
+      color: overrides.gridStyle?.color ?? "#707070",
+      width: overrides.gridStyle?.width ?? "",
+      opacity: overrides.gridStyle?.opacity ?? 0.6,
+    },
   };
 
   const renderTemplate = foundry.applications?.handlebars?.renderTemplate ?? globalThis.renderTemplate;

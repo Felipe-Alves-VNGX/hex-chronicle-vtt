@@ -145,6 +145,26 @@ export function getAutoRevealRadius(scene = canvas.scene) {
   return game.settings.get(MODULE_ID, "autoRevealRadius");
 }
 
+/** Hardcoded fallback grid-line style, moved here from render.js so
+ * getGridStyle() has somewhere to fall back to when a scene has no
+ * override - these were render.js's GRID_COLOR/lineStyle constants before
+ * per-scene grid styling existed. `width: null` means "derive from the
+ * hex radius" (render.js's `Math.max(1, radius / 20)`), same as before -
+ * there's no single fixed pixel width that makes sense across every
+ * possible hex size. */
+const DEFAULT_GRID_STYLE = { lineType: "solid", color: 0x707070, width: null, opacity: 0.6 };
+
+export function getGridStyle(scene = canvas.scene) {
+  const gridStyle = getSceneOverrides(scene).gridStyle;
+  if (!gridStyle?.override) return DEFAULT_GRID_STYLE;
+  return {
+    lineType: gridStyle.lineType || DEFAULT_GRID_STYLE.lineType,
+    color: typeof gridStyle.color === "string" ? toColorNumber(gridStyle.color) ?? DEFAULT_GRID_STYLE.color : DEFAULT_GRID_STYLE.color,
+    width: typeof gridStyle.width === "number" ? gridStyle.width : DEFAULT_GRID_STYLE.width,
+    opacity: typeof gridStyle.opacity === "number" ? gridStyle.opacity : DEFAULT_GRID_STYLE.opacity,
+  };
+}
+
 export function toColorNumber(value) {
   if (typeof value === "number") return value;
   if (typeof value === "string" && value.startsWith("#")) return Number.parseInt(value.slice(1), 16);
