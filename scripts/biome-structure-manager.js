@@ -1,0 +1,114 @@
+/**
+ * GM-only world-scoped manager for custom biomes (terrain types) and
+ * structures (building icons) - see custom-registry.js for the settings
+ * these read/write. Reached via a settings menu (registerRegistryMenu()
+ * below), not the module's own scene-controls toolbar, since it manages
+ * world data, not anything about the current scene.
+ *
+ * Same "write immediately, no form-wide Save button" pattern as Hex
+ * Overview's bulk actions - every add/remove is its own game.settings.set
+ * call (inside custom-registry.js), followed by a re-render of this
+ * window's own list.
+ */
+import { MODULE_ID } from "./settings.js";
+import { TERRAIN_TYPES } from "./data-model.js";
+import { BUILDING_ICONS } from "./hex-icon-picker.js";
+import {
+  getCustomBiomes,
+  getCustomStructures,
+  addCustomBiome,
+  removeCustomBiome,
+  addCustomStructure,
+  removeCustomStructure,
+} from "./custom-registry.js";
+
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+
+function getFilePickerImpl() {
+  return foundry.applications?.apps?.FilePicker?.implementation ?? globalThis.FilePicker;
+}
+
+export class BiomeStructureManager extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "hex-chronicle-registry-manager",
+    window: {
+      title: "HEXCHRON.RegistryManagerTitle",
+      icon: "fa-solid fa-shapes",
+      resizable: true,
+      contentClasses: ["hex-chronicle-registry-manager"],
+    },
+    position: { width: 480, height: 620 },
+  };
+
+  static PARTS = {
+    body: { template: `modules/${MODULE_ID}/templates/biome-structure-manager.hbs`, scrollable: [""] },
+  };
+
+  #newStructurePath = "";
+
+  async _prepareContext() {
+    return {
+      builtinBiomes: TERRAIN_TYPES,
+      customBiomes: Object.entries(getCustomBiomes()).map(([slug, biome]) => ({ slug, ...biome })),
+      builtinStructures: BUILDING_ICONS,
+      customStructures: Object.entries(getCustomStructures()).map(([slug, structure]) => ({ slug, ...structure })),
+      newStructurePath: this.#newStructurePath,
+    };
+  }
+
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+
+    this.element.querySelector('[data-action="addBiome"]')?.addEventListener("click", async () => {
+      const nameInput = this.element.querySelector('input[name="newBiomeName"]');
+      const colorInput = this.element.querySelector('input[name="newBiomeColor"]');
+      const slug = await addCustomBiome(nameInput.value, colorInput.value, TERRAIN_TYPES);
+      if (slug) this.render();
+    });
+
+    for (const btn of this.element.querySelectorAll('[data-action="removeBiome"]')) {
+      btn.addEventListener("click", async () => {
+        await removeCustomBiome(btn.dataset.slug);
+        this.render();
+      });
+    }
+
+    this.element.querySelector('[data-action="chooseStructureImage"]')?.addEventListener("click", () => {
+      const FilePickerImpl = getFilePickerImpl();
+      new FilePickerImpl({
+        type: "image",
+        callback: (path) => {
+          this.#newStructurePath = path;
+          this.render();
+        },
+      }).render(true);
+    });
+
+    this.element.querySelector('[data-action="addStructure"]')?.addEventListener("click", async () => {
+      const nameInput = this.element.querySelector('input[name="newStructureName"]');
+      const slug = await addCustomStructure(nameInput.value, this.#newStructurePath, BUILDING_ICONS);
+      if (slug) {
+        this.#newStructurePath = "";
+        this.render();
+      }
+    });
+
+    for (const btn of this.element.querySelectorAll('[data-action="removeStructure"]')) {
+      btn.addEventListener("click", async () => {
+        await removeCustomStructure(btn.dataset.slug);
+        this.render();
+      });
+    }
+  }
+}
+
+export function registerRegistryMenu() {
+  game.settings.registerMenu(MODULE_ID, "manageBiomesStructures", {
+    name: "HEXCHRON.RegistryMenuName",
+    label: "HEXCHRON.RegistryMenuLabel",
+    hint: "HEXCHRON.RegistryMenuHint",
+    icon: "fa-solid fa-shapes",
+    type: BiomeStructureManager,
+    restricted: true,
+  });
+}

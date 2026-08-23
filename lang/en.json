@@ -108,6 +108,19 @@
     "SceneOverridePalette": "Color palette",
     "RegistryInvalidName": "Enter a name (letters/numbers only after simplification).",
     "RegistryDuplicateKey": "\"{slug}\" already exists as a built-in or custom entry.",
-    "RegistryMissingImage": "Choose an image for this structure first."
+    "RegistryMissingImage": "Choose an image for this structure first.",
+    "RegistryMenuName": "Manage Biomes & Structures",
+    "RegistryMenuLabel": "Manage Biomes & Structures",
+    "RegistryMenuHint": "Add or remove custom terrain types (biomes) and building icons (structures) beyond the module's built-in set - available to every scene.",
+    "RegistryManagerTitle": "Manage Biomes & Structures",
+    "RegistryBiomesLegend": "Biomes",
+    "RegistryStructuresLegend": "Structures",
+    "RegistryNoCustomBiomes": "No custom biomes yet.",
+    "RegistryNoCustomStructures": "No custom structures yet.",
+    "RegistryNamePlaceholder": "Name",
+    "RegistryAdd": "Add",
+    "RegistryChooseImage": "Choose Image",
+    "RegistryBuiltinBiomes": "Built-in",
+    "RegistryBuiltinStructures": "Built-in"
   }
 }

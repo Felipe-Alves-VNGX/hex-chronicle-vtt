@@ -611,3 +611,44 @@
   border-width: 2px;
   border-style: dashed;
 }
+
+/* --- Biome/structure manager --- */
+
+.hex-chronicle-registry-manager .hc-registry-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.hex-chronicle-registry-manager .hc-registry-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  flex: 0 0 auto;
+}
+
+.hex-chronicle-registry-manager .hc-registry-icon,
+.hex-chronicle-registry-manager .hc-registry-icon-preview {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.hex-chronicle-registry-manager .hc-registry-name {
+  flex: 1 1 auto;
+}
+
+.hex-chronicle-registry-manager .hc-registry-slug {
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}

@@ -5,6 +5,8 @@ import { openImportDialog } from "./import.js";
 import { HexOverview } from "./hex-overview.js";
 import { toggleLegend } from "./hex-legend.js";
 import { registerSceneConfigTab } from "./scene-config.js";
+import { registerCustomRegistrySettings } from "./custom-registry.js";
+import { registerRegistryMenu } from "./biome-structure-manager.js";
 
 // Singleton so repeated clicks on the toolbar button re-focus the same
 // window instead of stacking up duplicates.
@@ -12,6 +14,8 @@ let hexOverviewApp = null;
 
 Hooks.once("init", () => {
   registerSettings();
+  registerCustomRegistrySettings();
+  registerRegistryMenu();
   registerSceneConfigTab();
 
   CONFIG.Canvas.layers.hexChronicle = {

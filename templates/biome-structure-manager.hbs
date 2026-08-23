@@ -1,0 +1,54 @@
+<div class="hc-registry-manager">
+  <fieldset>
+    <legend><i class="fa-solid fa-mountain-sun"></i> {{localize "HEXCHRON.RegistryBiomesLegend"}}</legend>
+
+    <div class="hc-registry-list">
+      {{#each customBiomes}}
+      <div class="hc-registry-row">
+        <span class="hc-registry-swatch" style="background-color: {{this.color}};"></span>
+        <span class="hc-registry-name">{{this.name}}</span>
+        <span class="hc-registry-slug">{{this.slug}}</span>
+        <button type="button" data-action="removeBiome" data-slug="{{this.slug}}"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      {{else}}
+      <p class="hint">{{localize "HEXCHRON.RegistryNoCustomBiomes"}}</p>
+      {{/each}}
+    </div>
+
+    <div class="hc-registry-add">
+      <input type="text" name="newBiomeName" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
+      <input type="color" name="newBiomeColor" value="#888888" />
+      <button type="button" data-action="addBiome">{{localize "HEXCHRON.RegistryAdd"}}</button>
+    </div>
+
+    <p class="hint">{{localize "HEXCHRON.RegistryBuiltinBiomes"}}: {{#each builtinBiomes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+  </fieldset>
+
+  <fieldset>
+    <legend><i class="fa-solid fa-chess-rook"></i> {{localize "HEXCHRON.RegistryStructuresLegend"}}</legend>
+
+    <div class="hc-registry-list">
+      {{#each customStructures}}
+      <div class="hc-registry-row">
+        <img class="hc-registry-icon" src="{{this.path}}" alt="{{this.name}}" />
+        <span class="hc-registry-name">{{this.name}}</span>
+        <span class="hc-registry-slug">{{this.slug}}</span>
+        <button type="button" data-action="removeStructure" data-slug="{{this.slug}}"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      {{else}}
+      <p class="hint">{{localize "HEXCHRON.RegistryNoCustomStructures"}}</p>
+      {{/each}}
+    </div>
+
+    <div class="hc-registry-add">
+      <input type="text" name="newStructureName" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
+      <button type="button" data-action="chooseStructureImage">{{localize "HEXCHRON.RegistryChooseImage"}}</button>
+      {{#if newStructurePath}}
+      <img class="hc-registry-icon-preview" src="{{newStructurePath}}" alt="" />
+      {{/if}}
+      <button type="button" data-action="addStructure">{{localize "HEXCHRON.RegistryAdd"}}</button>
+    </div>
+
+    <p class="hint">{{localize "HEXCHRON.RegistryBuiltinStructures"}}: {{#each builtinStructures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+  </fieldset>
+</div>
