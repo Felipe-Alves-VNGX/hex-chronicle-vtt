@@ -165,6 +165,15 @@ export function getGridStyle(scene = canvas.scene) {
   };
 }
 
+/** Standalone per-scene toggle for showing zone boundaries to players -
+ * deliberately NOT tied to structure-reveal or any other fog state (a
+ * scene either always shows zone outlines to players or never does, no
+ * per-hex granularity). Default false matches the module's previous
+ * GM-only behavior. */
+export function isZoneVisibleToPlayers(scene = canvas.scene) {
+  return getSceneOverrides(scene).zonesVisibleToPlayers ?? false;
+}
+
 export function toColorNumber(value) {
   if (typeof value === "number") return value;
   if (typeof value === "string" && value.startsWith("#")) return Number.parseInt(value.slice(1), 16);

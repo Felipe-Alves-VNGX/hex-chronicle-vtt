@@ -138,6 +138,12 @@ imported files, in old saved hexes - and is expanded to its fine
 equivalent automatically every time it's read. Nothing needs migrating;
 a hex only starts storing the new tokens once it's next saved.
 
+Zone boundaries (the dashed outlines drawn around a cluster of hexes
+sharing a zone tag) are GM-only by default, same as the map's own zones
+list - a scene's Hex Chronicle Scene Config tab has a standalone "Show
+zone outlines to players" toggle if you want players to see them anyway,
+independent of structure reveal or terrain fog.
+
 ## Exploration / fog-of-war
 
 Fog-of-war has two independent layers, so a hex's terrain and whatever's

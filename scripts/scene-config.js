@@ -70,6 +70,7 @@ async function onRenderSceneConfig(app, element) {
       width: overrides.gridStyle?.width ?? "",
       opacity: overrides.gridStyle?.opacity ?? 0.6,
     },
+    zonesVisibleToPlayers: !!overrides.zonesVisibleToPlayers,
   };
 
   const renderTemplate = foundry.applications?.handlebars?.renderTemplate ?? globalThis.renderTemplate;

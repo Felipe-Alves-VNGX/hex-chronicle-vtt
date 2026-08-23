@@ -10,7 +10,7 @@
  * simply never draws them for non-GM users. Revisit if the campaign wants
  * players to see zone outlines.
  */
-import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber, getGridStyle } from "./settings.js";
+import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber, getGridStyle, isZoneVisibleToPlayers } from "./settings.js";
 import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
 import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
@@ -225,7 +225,7 @@ export async function renderHexes(container, scene, { isGM }) {
     drawNumber(numbersLayer, col, row, radius, origin);
   }
 
-  if (isGM) {
+  if (isGM || isZoneVisibleToPlayers(scene)) {
     drawZones(zonesLayer, hexes, radius, origin, scene);
   }
 }

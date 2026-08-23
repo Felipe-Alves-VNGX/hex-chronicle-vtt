@@ -116,6 +116,8 @@
     "GridLineTypeDashed": "Dashed",
     "GridLineTypeDotted": "Dotted",
     "GridLineTypeNone": "None",
+    "SceneZonesVisibleToPlayers": "Show zone outlines to players",
+    "SceneZonesVisibleToPlayersHint": "Independent of structure reveal - when on, any player sees a hex's dashed zone outline as soon as the zone is drawn at all, on this scene only.",
     "RegistryInvalidName": "Enter a name (letters/numbers only after simplification).",
     "RegistryDuplicateKey": "\"{slug}\" already exists as a built-in or custom entry.",
     "RegistryMissingImage": "Choose an image for this structure first.",
