@@ -34,6 +34,8 @@
     "SectionStructure": "Structure",
     "SectionPaths": "Roads & Rivers",
     "SectionZonesLinks": "Zones & Links",
+    "SectionNotes": "GM Notes",
+    "FieldNotes": "Notes (GM-only, never shown to players)",
     "OpenLink": "Open",
     "FieldTerrainType": "Terrain",
     "FieldMixedTerrain": "Mixed terrain",
