@@ -307,7 +307,7 @@ Substituição do Hex Directory (lista pesquisável) por Hex Overview
 (dashboard). Novas funcionalidades:
 - **Agregação de estatísticas**: contagem de terreno, notas, links e ícones
   em todos os hexes da cena num relance.
-- **Filtros combinável**: terreno, zona, notas e link - refinam a tabela em
+- **Filtros combináveis**: terreno, zona, notas e link - refinam a tabela em
   tempo real sem recarregar.
 - **Edição inline rápida**: clique no rótulo/notas/zona de um hex pra editar
   direto, sem abrir o formulário completo.
