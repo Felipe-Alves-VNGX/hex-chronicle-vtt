@@ -36,6 +36,8 @@
     "OverviewStatNotes": "With notes",
     "OverviewStatLink": "With link",
     "OverviewStatIcon": "With icon",
+    "OverviewAddZoneTag": "Add zone tag",
+    "OverviewAddZoneTagPrompt": "Zone tag to add:",
     "ToolLegend": "Toggle Legend",
     "LegendTerrain": "Terrain",
     "LegendZoneKey": "Zone positions",

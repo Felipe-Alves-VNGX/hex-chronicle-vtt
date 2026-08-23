@@ -55,7 +55,12 @@
           <td>
             <span class="hc-overview-terrain">{{this.terrain}}</span>
             {{#if this.mixed}}<span class="hc-overview-mixed">({{this.mixed}})</span>{{/if}}
-            {{#if this.zone}}<div class="hc-overview-zones">{{this.zone}}</div>{{/if}}
+            <div class="hc-overview-zones" data-col="{{this.col}}" data-row="{{this.row}}">
+              {{#each this.zoneList}}
+              <span class="hc-overview-zone-chip">{{this}}<button type="button" data-action="removeZone" data-tag="{{this}}">×</button></span>
+              {{/each}}
+              <button type="button" class="hc-overview-zone-add" data-action="addZone" data-tooltip="{{localize 'HEXCHRON.OverviewAddZoneTag'}}">+</button>
+            </div>
           </td>
           <td class="hc-overview-editable" data-action="editField" data-field="alt" data-col="{{this.col}}" data-row="{{this.row}}" data-tooltip="{{localize 'HEXCHRON.OverviewClickToEdit'}}">
             {{#if this.alt}}<span class="hc-overview-alt">{{this.alt}}</span>{{/if}}

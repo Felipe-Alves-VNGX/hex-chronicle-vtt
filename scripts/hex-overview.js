@@ -144,6 +144,18 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
         await canvas.hexChronicle?.refresh();
       });
     }
+    for (const btn of this.element.querySelectorAll('[data-action="removeZone"]')) {
+      btn.addEventListener("click", () => {
+        const container = btn.closest(".hc-overview-zones");
+        this.#removeZoneTag(Number(container.dataset.col), Number(container.dataset.row), btn.dataset.tag);
+      });
+    }
+    for (const btn of this.element.querySelectorAll('[data-action="addZone"]')) {
+      btn.addEventListener("click", () => {
+        const container = btn.closest(".hc-overview-zones");
+        this.#addZoneTag(Number(container.dataset.col), Number(container.dataset.row));
+      });
+    }
 
     const search = this.element.querySelector('input[name="search"]');
     if (search) {
@@ -228,6 +240,25 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
         cancel();
       }
     });
+  }
+
+  async #currentZoneList(col, row) {
+    const scene = canvas.scene;
+    const raw = scene.getFlag(MODULE_ID, "hexes")?.[`${col},${row}`] ?? {};
+    return normalizeHexContent(raw).zone;
+  }
+
+  async #addZoneTag(col, row) {
+    const tag = (window.prompt(game.i18n.localize("HEXCHRON.OverviewAddZoneTagPrompt")) ?? "").trim();
+    if (!tag) return;
+    const current = await this.#currentZoneList(col, row);
+    if (current.includes(tag)) return;
+    await applyHexPatches(canvas.scene, [{ col, row, patch: { zone: [...current, tag] } }]);
+  }
+
+  async #removeZoneTag(col, row, tag) {
+    const current = await this.#currentZoneList(col, row);
+    await applyHexPatches(canvas.scene, [{ col, row, patch: { zone: current.filter((z) => z !== tag) } }]);
   }
 
   #gotoHex(col, row) {

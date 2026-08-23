@@ -395,6 +395,34 @@
   font-style: italic;
 }
 
+.hc-overview-zone-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+  margin: 0.1rem 0.15rem 0 0;
+}
+
+.hc-overview-zone-chip button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.hc-overview-zone-add {
+  border: none;
+  background: none;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0 0.2rem;
+}
+
 .hc-overview-alt {
   margin-right: 0.3rem;
 }
