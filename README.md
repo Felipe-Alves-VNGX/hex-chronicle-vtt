@@ -224,6 +224,26 @@ same as the rest of Scene Configuration):
   always dragged against one specific scene's background art, so writing
   world-wide would silently misalign every other scene using the same grid
   numbers.
+- Per-scene control over which toolbar tools are available (e.g. lock out
+  "Edit Hex" on a scene whose map is finished, without hiding the rest of
+  the toolbar).
+- Grid line style: solid, dashed, dotted, or no line at all, plus its
+  color/width/opacity - independent of the grid's position/size above.
+- A standalone "Show zone outlines to players" toggle - unlike the grid and
+  auto-reveal overrides, this isn't gated by anything else (structure
+  reveal, terrain fog); a scene either shows zone outlines to players or it
+  doesn't.
+
+Custom biomes (terrain types) and structures (building icons), beyond the
+module's built-in set, are managed world-wide from **Manage Biomes &
+Structures** - a menu button in Foundry's "Configure Settings" (this
+module's section), not part of the per-scene tab above, since a custom
+biome/structure is available to every scene once defined. A biome is a
+name + a color; a structure is a name + an image (chosen via Foundry's
+file picker) - once added, both show up everywhere their built-in
+counterparts already do: the hex editor's terrain dropdown and
+mixed-terrain brush, the building-icon picker, the map render, and the
+color palette.
 
 ## Verifying this build
 
@@ -286,3 +306,25 @@ real v13 or v14 world:
 18. Turn on the palette override with different colors than the world
     setting, save, and confirm only that scene's terrain colors change
     (including in the hex editor's diagram and the legend for that scene).
+19. On the Scene Config tab, uncheck a couple of tools (e.g. "Edit Hex" and
+    "Hex Overview") and confirm exactly those buttons disappear from the
+    toolbar for both GM and player, while the rest of the group stays.
+20. Set the grid line type to each of Solid/Dashed/Dotted/None in turn,
+    saving between each, and confirm the map's hex outlines actually change
+    shape (a visible dash pattern for Dashed, a finer dotted pattern for
+    Dotted, nothing drawn for None but hexes still clickable/hoverable) -
+    then confirm a custom color/width/opacity applies too.
+21. Turn on "Show zone outlines to players" on a scene with an authored
+    zone, and confirm a connected player sees the dashed outline
+    immediately (no structure-reveal needed) - turn it back off and confirm
+    it disappears for the player again while the GM still sees it either
+    way.
+22. Open "Manage Biomes & Structures" from Configure Settings, add a custom
+    biome (name + color) and a custom structure (name + an image via
+    "Choose Image"), and confirm both appear in: the hex editor's terrain
+    dropdown, the mixed-terrain brush palette (biome only), the building
+    icon picker (structure only), and - once painted onto a hex and
+    saved - the actual map render and the on-screen legend. Then remove
+    both from the manager and confirm the already-painted hex falls back
+    gracefully (unknown-terrain color / no icon, no crash) instead of
+    breaking the render.

@@ -323,6 +323,43 @@ Substituição do Hex Directory (lista pesquisável) por Hex Overview
 - **Campo de notas GM**: novo campo no editor de hex, visível só pro GM,
   pra anotações privadas (estratégia de campanha, NPCs que moram ali, etc).
 
+### Ampliação da aba de cena + registros de biomas/estruturas customizados - pendente de teste ao vivo
+Continuação da aba "Hex Chronicle" na Scene Configuration (ver seção
+seguinte): três novos overrides por cena e um subsistema novo de mundo
+inteiro.
+- **Controle por ferramenta**: cada ferramenta da toolbar (Editar, Revelar
+  Terreno, Revelar Estrutura, Abrir Link, Align Grid, Import, Reset Fog,
+  Overview, Legend) ganhou seu próprio checkbox de visibilidade por cena
+  (`sceneOverrides.tools.<nome>`, `settings.js#isToolVisibleOnScene`).
+- **Estilo de linha da grade**: tipo (sólida/tracejada/pontilhada/nenhuma),
+  cor, espessura e opacidade, configuráveis por cena
+  (`sceneOverrides.gridStyle`, `settings.js#getGridStyle`,
+  `render.js#drawGrid` reescrito pra ramificar por tipo, reaproveitando o
+  mesmo traço segmentado que os contornos de zona já usavam).
+- **Zonas visíveis a jogadores**: toggle independente, não amarrado à
+  revelação de estrutura (`sceneOverrides.zonesVisibleToPlayers`,
+  `settings.js#isZoneVisibleToPlayers`) - confirmado explicitamente que são
+  "duas coisas diferentes" durante o brainstorm desta feature.
+- **Biomas e estruturas customizados** (`scripts/custom-registry.js`,
+  `scripts/biome-structure-manager.js`): dois world settings `config:false`
+  (`customBiomes`, `customStructures`), cada entrada só nome + cor (bioma)
+  ou nome + imagem via `FilePicker` (estrutura), slug derivado
+  automaticamente do nome. Gerenciados por uma janela própria
+  (`BiomeStructureManager`) atrás de um `game.settings.registerMenu` em
+  Configure Settings - mundo inteiro, não por cena, já que um bioma/
+  estrutura definido vale pra qualquer cena. Integrado em todo lugar que
+  antes só conhecia a lista fixa: `data-model.js#getAllTerrainTypes()`
+  (dropdown de terreno + pincel de terreno misto), `render.js#palette()`
+  (cores), `data-model.js#resolveIcon()`/`render.js#getIconTexture()`
+  (resolução do ícone customizado via prefixo `custom:<slug>`, path
+  completo do `FilePicker` em vez da convenção `assets/icons/building/`
+  do módulo), `hex-icon-picker.js` (grade de ícones). Remover uma entrada
+  customizada não migra os hexes que já a referenciam - cai na mesma
+  tolerância de "tipo/ícone desconhecido" que um typo já tinha antes.
+- **Não testado ao vivo ainda** (mesma limitação já registrada na seção
+  seguinte) - ver os itens 19-22 do "Verifying this build" do README antes
+  de considerar pronto.
+
 ### Configuração por cena (aba "Hex Chronicle" na Scene Configuration) - pendente de teste ao vivo
 Todas as configurações do módulo eram world-scope (uma única grade/paleta/
 auto-revelação para todas as cenas), apesar de a ferramenta Align Grid já
