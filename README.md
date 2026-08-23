@@ -102,7 +102,8 @@ click will land on before committing to it.
   hex grid instead of typing `originX`/`originY`/`hexRadius` into the
   module settings - a red dot at the grid's origin, a blue dot to resize
   it, with a live preview grid over the scene's background art. Only
-  writes to the settings once, when you release a handle.
+  writes once, when you release a handle - into this scene's grid override
+  (see "Per-scene settings" below), not the world default.
 - **Import Hex Files** (GM): pick one or more `.md` (hex-chronicle
   frontmatter) or `.yaml`/`.yml` files - same format the original CLI tool
   reads - to populate the current scene in one shot.
@@ -187,13 +188,36 @@ open a link they haven't discovered yet.
 
 ## Settings
 
+World-level defaults, in Foundry's "Configure Settings":
+
 - Hex radius (px) and grid origin (X/Y) - position the hex overlay anywhere
   on the scene; it doesn't depend on the Scene's own configured grid type.
-  The **Align Grid** canvas tool (see "Usage" above) sets these two by
-  dragging instead of typing numbers here.
 - Auto-reveal on/off, and its radius in hex-rings.
 - A JSON palette override to customize terrain/zone colors, e.g.:
   `{"terrain": {"plains": "#90ee90"}, "zone": {"dangerous": "#ff0000"}}`.
+
+Any of these can be overridden per scene from a **Hex Chronicle** tab added
+to Foundry's own Scene Configuration sheet (gear icon on a scene in the
+Scenes sidebar) - see "Per-scene settings" below.
+
+## Per-scene settings
+
+The Scene Configuration sheet gets an extra **Hex Chronicle** tab (GM-only,
+same as the rest of Scene Configuration):
+
+- **Enable Hex Chronicle on this scene** - off by default only if you
+  explicitly turn it off; on for every existing and new scene otherwise.
+  Turning it off hides the entire Hex Chronicle toolbar group and its grid
+  on that scene, for GM and players alike - useful for scenes that aren't
+  hex-crawl maps (a tavern interior, a battle map, ...).
+- Per-scene overrides for grid position/size, auto-reveal, and the color
+  palette, each behind its own "Override for this scene" checkbox - left
+  unchecked, that scene just uses the world-level setting above. The
+  **Align Grid** canvas tool (see "Usage" above) writes directly into this
+  scene's grid override when dragged, rather than the world setting - it's
+  always dragged against one specific scene's background art, so writing
+  world-wide would silently misalign every other scene using the same grid
+  numbers.
 
 ## Verifying this build
 
@@ -236,3 +260,23 @@ real v13 or v14 world:
 13. Confirm a hex's notes never appear anywhere in player-facing rendering
     (canvas draw, legend) - Hex Overview and "Edit Hex" are the only
     GM-only surfaces that show them.
+14. Open a Scene's Configuration sheet and confirm the "Hex Chronicle" tab
+    appears alongside the core tabs, switches cleanly both ways (no overlap
+    with a core tab's content), and its fields reflect that scene's current
+    state.
+15. Uncheck "Enable Hex Chronicle on this scene", save, and confirm the
+    whole toolbar group disappears for both GM and a connected player, and
+    the grid stops drawing; re-check it and confirm both come back.
+16. Turn on the grid override, set a different radius/origin, save, and
+    confirm the map redraws at the new size/position on that scene only -
+    switch to another scene and confirm it still uses the world default (or
+    its own override). Then use the Align Grid canvas tool on the
+    overridden scene and confirm it updates that scene's override (not the
+    world setting, and not another scene's grid).
+17. Turn on the auto-reveal override with it disabled, move a player token
+    into an unexplored hex on that scene, and confirm it does NOT auto
+    reveal, while a scene without the override still does (per the world
+    setting).
+18. Turn on the palette override with different colors than the world
+    setting, save, and confirm only that scene's terrain colors change
+    (including in the hex editor's diagram and the legend for that scene).

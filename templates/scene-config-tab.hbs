@@ -1,0 +1,74 @@
+<div class="form-group">
+  <label>{{localize "HEXCHRON.SceneEnabled"}}</label>
+  <div class="form-fields">
+    <input type="checkbox" name="flags.hex-chronicle-vtt.enabled" {{checked enabled}} />
+  </div>
+  <p class="hint">{{localize "HEXCHRON.SceneEnabledHint"}}</p>
+</div>
+
+<fieldset>
+  <legend>{{localize "HEXCHRON.SceneOverrideGrid"}}</legend>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SceneOverrideEnable"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="flags.hex-chronicle-vtt.sceneOverrides.grid.override" {{checked grid.override}} />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingHexRadius"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.grid.hexRadius" value="{{grid.hexRadius}}" min="10" step="1" data-dtype="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingOriginX"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.grid.originX" value="{{grid.originX}}" step="1" data-dtype="Number" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingOriginY"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.grid.originY" value="{{grid.originY}}" step="1" data-dtype="Number" />
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>{{localize "HEXCHRON.SceneOverrideAutoReveal"}}</legend>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SceneOverrideEnable"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="flags.hex-chronicle-vtt.sceneOverrides.autoReveal.override" {{checked autoReveal.override}} />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingAutoReveal"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="flags.hex-chronicle-vtt.sceneOverrides.autoReveal.enabled" {{checked autoReveal.enabled}} />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SettingAutoRevealRadius"}}</label>
+    <div class="form-fields">
+      <input type="number" name="flags.hex-chronicle-vtt.sceneOverrides.autoReveal.radius" value="{{autoReveal.radius}}" min="0" step="1" data-dtype="Number" />
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>{{localize "HEXCHRON.SceneOverridePalette"}}</legend>
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SceneOverrideEnable"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" name="flags.hex-chronicle-vtt.sceneOverrides.palette.override" {{checked palette.override}} />
+    </div>
+  </div>
+  <div class="form-group stacked">
+    <label>{{localize "HEXCHRON.SettingPalette"}}</label>
+    <div class="form-fields">
+      <textarea name="flags.hex-chronicle-vtt.sceneOverrides.palette.json" rows="3">{{palette.json}}</textarea>
+    </div>
+    <p class="hint">{{localize "HEXCHRON.SettingPaletteHint"}}</p>
+  </div>
+</fieldset>

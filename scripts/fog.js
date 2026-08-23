@@ -18,7 +18,7 @@
  * Scene document - this avoids needing any custom socket protocol, at the
  * cost of auto-reveal only working while a GM client is connected.
  */
-import { MODULE_ID, getRadius, getOrigin, isAutoRevealEnabled, getAutoRevealRadius } from "./settings.js";
+import { MODULE_ID, getRadius, getOrigin, isAutoRevealEnabled, getAutoRevealRadius, isModuleEnabledOnScene } from "./settings.js";
 import { hexKey, normalizeHexContent, stripStructure } from "./data-model.js";
 import { neighborsWithinRange, pointToHex } from "./geometry.js";
 
@@ -149,17 +149,19 @@ export function getEffectiveContent(col, row, scene = canvas.scene, isGM = game.
 export function registerAutoRevealHook() {
   Hooks.on("updateToken", (tokenDoc, changes) => {
     if (!game.user.isGM) return;
-    if (!isAutoRevealEnabled()) return;
+    const scene = tokenDoc.parent;
+    if (!isModuleEnabledOnScene(scene)) return;
+    if (!isAutoRevealEnabled(scene)) return;
     if (!("x" in changes) && !("y" in changes)) return;
     if (!tokenDoc.hasPlayerOwner) return;
 
     const gridSize = canvas.grid.size;
     const cx = tokenDoc.x + (tokenDoc.width * gridSize) / 2;
     const cy = tokenDoc.y + (tokenDoc.height * gridSize) / 2;
-    const hex = pointToHex(cx, cy, getRadius(), getOrigin());
+    const hex = pointToHex(cx, cy, getRadius(scene), getOrigin(scene));
     if (!hex) return;
 
-    revealArea(hex.col, hex.row, getAutoRevealRadius(), tokenDoc.parent).then(() => {
+    revealArea(hex.col, hex.row, getAutoRevealRadius(scene), scene).then(() => {
       canvas.hexChronicle?.refresh();
     });
   });

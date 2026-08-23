@@ -1,9 +1,10 @@
-import { MODULE_ID, registerSettings } from "./settings.js";
+import { MODULE_ID, registerSettings, isModuleEnabledOnScene } from "./settings.js";
 import { HexChronicleLayer } from "./layer.js";
 import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
 import { HexOverview } from "./hex-overview.js";
 import { toggleLegend } from "./hex-legend.js";
+import { registerSceneConfigTab } from "./scene-config.js";
 
 // Singleton so repeated clicks on the toolbar button re-focus the same
 // window instead of stacking up duplicates.
@@ -11,6 +12,7 @@ let hexOverviewApp = null;
 
 Hooks.once("init", () => {
   registerSettings();
+  registerSceneConfigTab();
 
   CONFIG.Canvas.layers.hexChronicle = {
     layerClass: HexChronicleLayer,
@@ -38,6 +40,15 @@ Hooks.on("updateScene", (scene, changes) => {
   if (scene.id !== canvas.scene?.id) return;
   if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}`)) {
     canvas.hexChronicle?.refresh();
+    // The scene-controls toolbar builds its `visible` flag for our whole
+    // control group fresh on every render (see getSceneControlButtons
+    // below), but nothing else re-renders it just because a scene flag
+    // changed - without this, toggling "enabled" off/on in the Scene
+    // Config tab wouldn't hide/show the toolbar group until the next
+    // unrelated re-render (e.g. switching scenes).
+    if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.enabled`)) {
+      ui.controls.render();
+    }
   }
 });
 
@@ -67,7 +78,11 @@ Hooks.on("getSceneControlButtons", (controls) => {
     title: "HEXCHRON.ControlTitle",
     layer: "hexChronicle",
     icon: "fa-solid fa-hexagon",
-    visible: true,
+    // Hides the whole control group - for GM and players alike - on a scene
+    // where the "Hex Chronicle" Scene Config tab has it turned off. Absent
+    // flag (any scene from before this existed) reads as enabled, matching
+    // the module's previous always-on behavior.
+    visible: isModuleEnabledOnScene(canvas.scene),
     activeTool: "edit",
     tools: {
       edit: {

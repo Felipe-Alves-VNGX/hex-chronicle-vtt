@@ -323,6 +323,39 @@ Substituição do Hex Directory (lista pesquisável) por Hex Overview
 - **Campo de notas GM**: novo campo no editor de hex, visível só pro GM,
   pra anotações privadas (estratégia de campanha, NPCs que moram ali, etc).
 
+### Configuração por cena (aba "Hex Chronicle" na Scene Configuration) - pendente de teste ao vivo
+Todas as configurações do módulo eram world-scope (uma única grade/paleta/
+auto-revelação para todas as cenas), apesar de a ferramenta Align Grid já
+ser operada cena por cena. Nova aba injetada na ficha nativa de Scene
+Configuration do Foundry (`scripts/scene-config.js`, hook `renderSceneConfig`
+- não há API declarativa pra plugar aba numa ficha core que o módulo não
+possui, então é injeção de DOM: item de navegação + painel, lidos a partir
+do `data-group` real de uma aba existente em vez de assumir um nome fixo):
+- **Enabled**: liga/desliga o módulo inteiro nessa cena - desligado esconde
+  o grupo de ferramentas inteiro na toolbar (GM e jogador) e o `refresh()`
+  da camada para de desenhar qualquer coisa (`layer.js`). Ausência da flag
+  (toda cena anterior a esta feature) lê como ligado, preservando o
+  comportamento anterior.
+- **Overrides por cena**: raio/origem da grade, auto-revelação (liga/desliga
+  + raio) e paleta de cores, cada um atrás do seu próprio checkbox
+  "Override for this scene" - sem isso, `settings.js` cai no valor
+  world-scope de sempre. `setOrigin()`/`setRadius()` (usados pela ferramenta
+  Align Grid) passaram a gravar no override da cena, e não mais na
+  configuração do mundo - corrige a inconsistência de uma ferramenta
+  operada por cena escrever um valor global.
+- Campos usam `name="flags.hex-chronicle-vtt...."` dentro do `<form>` nativo
+  da ficha, então o próprio submit handler do Foundry já persiste via
+  `scene.update()` - nenhuma lógica de submit própria foi necessária.
+- **Não testado ao vivo ainda** (sem uma instância real de Foundry disponível
+  neste ambiente) - a técnica de injeção de aba, o `changeTab()` programático
+  e o comportamento de checkbox/`data-dtype="Number"` do `FormDataExtended`
+  seguem convenções documentadas e usadas por outros módulos v13, mas
+  precisam de confirmação prática: abrir a Scene Configuration, alternar
+  entre a aba nova e as abas core (nenhuma sobreposição visual), marcar/
+  desmarcar "Enabled" e conferir que a toolbar some/aparece pra GM e
+  jogador, marcar cada override e conferir que o valor realmente aplica
+  (grade, auto-revelação, paleta) e que desmarcar volta pro valor global.
+
 ## Limitações conhecidas (decisões deliberadas, não bugs)
 
 - **Sigilo é "suave", não real**: o conteúdo de hexágonos não explorados

@@ -99,6 +99,12 @@
     "SettingAutoRevealRadius": "Auto-reveal radius (hex steps)",
     "SettingAutoRevealRadiusHint": "0 reveals only the hex the token enters; higher values also reveal that many rings of neighbors.",
     "SettingPalette": "Custom palette override (JSON)",
-    "SettingPaletteHint": "Optional JSON like {\"terrain\":{\"plains\":\"#90ee90\"},\"zone\":{\"dangerous\":\"#ff0000\"}} to override default colors."
+    "SettingPaletteHint": "Optional JSON like {\"terrain\":{\"plains\":\"#90ee90\"},\"zone\":{\"dangerous\":\"#ff0000\"}} to override default colors.",
+    "SceneEnabled": "Enable Hex Chronicle on this scene",
+    "SceneEnabledHint": "When off, the whole Hex Chronicle toolbar and its grid are hidden on this scene, for GM and players alike.",
+    "SceneOverrideEnable": "Override for this scene",
+    "SceneOverrideGrid": "Grid position & size",
+    "SceneOverrideAutoReveal": "Auto-reveal",
+    "SceneOverridePalette": "Color palette"
   }
 }

@@ -15,7 +15,7 @@
  * a non-GM player - see the inline comments below for what that live
  * testing turned up.
  */
-import { getRadius, getOrigin, setOrigin, setRadius } from "./settings.js";
+import { getRadius, getOrigin, setOrigin, setRadius, isModuleEnabledOnScene } from "./settings.js";
 import { pointToHex, hexShapePoints, neighborsWithinRange } from "./geometry.js";
 import { renderHexes } from "./render.js";
 import { toggleHex, toggleStructure, getEffectiveContent } from "./fog.js";
@@ -150,6 +150,14 @@ export class HexChronicleLayer extends InteractionLayerBase {
 
   async refresh() {
     if (!this.container || !canvas.scene) return;
+    // Disabled scene (Hex Chronicle tab in Scene Config): draw nothing, not
+    // even the empty starter grid - the toolbar group is also hidden for
+    // this scene (see init.js's getSceneControlButtons), so there'd be no
+    // way to interact with a grid drawn here anyway.
+    if (!isModuleEnabledOnScene(canvas.scene)) {
+      this.container.removeChildren().forEach((c) => c.destroy({ children: true }));
+      return;
+    }
     await renderHexes(this.container, canvas.scene, { isGM: game.user.isGM });
   }
 

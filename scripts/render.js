@@ -60,21 +60,21 @@ const textureCache = new Map();
  * paints with the exact same colors (including any world palette override)
  * as the actual map render - keeps the picker WYSIWYG instead of drifting
  * out of sync with a second hardcoded color list. */
-export function palette() {
-  const override = getPaletteOverride();
+export function palette(scene = canvas.scene) {
+  const override = getPaletteOverride(scene);
   return {
     terrain: { ...DEFAULT_TERRAIN_COLORS, ...(override.terrain ?? {}) },
     zone: { ...DEFAULT_ZONE_COLORS, ...(override.zone ?? {}) },
   };
 }
 
-function terrainColor(type) {
-  const p = palette();
+function terrainColor(type, scene) {
+  const p = palette(scene);
   return p.terrain[type] ?? p.terrain.unknown;
 }
 
-function zoneColor(name) {
-  const p = palette();
+function zoneColor(name, scene) {
+  const p = palette(scene);
   return p.zone[name] ?? 0x228b22;
 }
 
@@ -166,8 +166,8 @@ async function preloadIcons(contents) {
 export async function renderHexes(container, scene, { isGM }) {
   container.removeChildren().forEach((c) => c.destroy({ children: true }));
 
-  const radius = getRadius();
-  const origin = getOrigin();
+  const radius = getRadius(scene);
+  const origin = getOrigin(scene);
   const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
   const hexes = new Map(Object.entries(raw).map(([k, v]) => [k, normalizeHexContent(v)]));
 
@@ -205,12 +205,12 @@ export async function renderHexes(container, scene, { isGM }) {
   for (const [key, content] of effectiveByKey) {
     const { col, row } = parseHexKey(key);
     drawGrid(gridLayer, col, row, radius, origin);
-    drawContent(contentLayer, col, row, radius, origin, content);
+    drawContent(contentLayer, col, row, radius, origin, content, scene);
     drawNumber(numbersLayer, col, row, radius, origin);
   }
 
   if (isGM) {
-    drawZones(zonesLayer, hexes, radius, origin);
+    drawZones(zonesLayer, hexes, radius, origin, scene);
   }
 }
 
@@ -221,17 +221,17 @@ function drawGrid(graphics, col, row, radius, origin) {
   graphics.drawPolygon(flat);
 }
 
-function drawContent(container, col, row, radius, origin, content) {
+function drawContent(container, col, row, radius, origin, content, scene) {
   const g = new PIXI.Graphics();
   container.addChild(g);
 
   const shape = hexShapePoints(col, row, radius, origin);
-  drawHexPolygon(g, shape, { fillColor: terrainColor(content.terrain.type ?? "unknown") });
+  drawHexPolygon(g, shape, { fillColor: terrainColor(content.terrain.type ?? "unknown", scene) });
 
   for (const mixed of content.terrain.mixed) {
     for (const side of mixed.sides) {
       const poly = zonePolygon(side, col, row, radius, origin);
-      drawHexPolygon(g, poly, { fillColor: terrainColor(mixed.type) });
+      drawHexPolygon(g, poly, { fillColor: terrainColor(mixed.type, scene) });
     }
   }
 
@@ -309,7 +309,7 @@ function drawNumber(container, col, row, radius, origin) {
   container.addChild(text);
 }
 
-function drawZones(graphics, hexes, radius, origin) {
+function drawZones(graphics, hexes, radius, origin, scene) {
   const byZone = new Map();
   for (const [key, content] of hexes) {
     const { col, row } = parseHexKey(key);
@@ -323,7 +323,7 @@ function drawZones(graphics, hexes, radius, origin) {
   for (const [zone, cells] of byZone) {
     const loops = zoneClusterLoops(cells, radius, origin);
     for (const loop of loops) {
-      strokeDashedPolyline(graphics, loop, { color: zoneColor(zone), width: strokeW });
+      strokeDashedPolyline(graphics, loop, { color: zoneColor(zone, scene), width: strokeW });
     }
   }
 }
