@@ -235,12 +235,7 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.querySelector('[data-action="bulkHideStructure"]')?.addEventListener("click", () => this.#bulkSetStructure(false));
     this.element.querySelector('[data-action="bulkAddZone"]')?.addEventListener("click", () => this.#bulkZoneTag(true));
     this.element.querySelector('[data-action="bulkRemoveZone"]')?.addEventListener("click", () => this.#bulkZoneTag(false));
-    this.element.querySelector('[data-action="bulkClear"]')?.addEventListener("click", () => {
-      this.#selected.clear();
-      this.#updateBulkBar();
-      for (const box of this.element.querySelectorAll('[data-action="select"]')) box.checked = false;
-      if (selectAll) selectAll.checked = false;
-    });
+    this.element.querySelector('[data-action="bulkClear"]')?.addEventListener("click", () => this.#clearSelectionUI());
   }
 
   #startInlineEdit(cell) {
@@ -314,16 +309,24 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     if (count) count.textContent = game.i18n.format("HEXCHRON.OverviewBulkCount", { count: this.#selected.size });
   }
 
+  #clearSelectionUI() {
+    this.#selected.clear();
+    for (const box of this.element.querySelectorAll('[data-action="select"]')) box.checked = false;
+    const selectAll = this.element.querySelector('[data-action="selectAll"]');
+    if (selectAll) selectAll.checked = false;
+    this.#updateBulkBar();
+  }
+
   async #bulkSetExplored(value) {
     await setExploredMany(this.#selectedCells(), value);
     await canvas.hexChronicle?.refresh();
-    this.#selected.clear();
+    this.#clearSelectionUI();
   }
 
   async #bulkSetStructure(value) {
     await setStructureRevealedMany(this.#selectedCells(), value);
     await canvas.hexChronicle?.refresh();
-    this.#selected.clear();
+    this.#clearSelectionUI();
   }
 
   async #bulkZoneTag(add) {
@@ -338,7 +341,7 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
       return { col, row, patch: { zone } };
     });
     await applyHexPatches(scene, patches);
-    this.#selected.clear();
+    this.#clearSelectionUI();
   }
 
   #gotoHex(col, row) {
