@@ -14,6 +14,7 @@
  *   rivers: ["N1 N7"],
  *   zone: ["secured"],
  *   link: "JournalEntry.aBc123" | "Scene.xYz789" | "JournalEntry.aBc123.JournalEntryPage.dEf456",
+ *   notes: "Some longer GM-only text",
  * }
  *
  * `sides`/road/river endpoints use the 24 fine terrain-zone tokens and 13
@@ -29,8 +30,12 @@
  * or a Scene to jump to. It's the hex-chronicle equivalent of a native
  * Foundry Note pin, but attached to the hex itself instead of a separate
  * canvas pin.
+ *
+ * `notes` is GM-only, longer-form text (never gated/stripped since nothing
+ * player-facing reads it).
  */
 import { isValidZone, isValidPathAnchor, normalizeCardinal } from "./geometry.js";
+import { MODULE_ID } from "./settings.js";
 
 /** The original 7-token vocabulary (N/NE/SE/S/SW/NW/C), kept forever valid
  * for reading - old hex data, hand-typed text, and imported files all still
@@ -81,7 +86,7 @@ export const TERRAIN_TYPES = [
 ];
 
 export function emptyHex() {
-  return { terrain: { type: undefined, mixed: [] }, alt: "", icon: "", roads: [], rivers: [], zone: [], link: "" };
+  return { terrain: { type: undefined, mixed: [] }, alt: "", icon: "", roads: [], rivers: [], zone: [], link: "", notes: "" };
 }
 
 function normalizeSides(sides) {
@@ -136,6 +141,7 @@ export function normalizeHexContent(raw = {}) {
 
   if (typeof raw.alt === "string" && raw.alt.trim()) out.alt = raw.alt.trim();
   if (typeof raw.icon === "string" && raw.icon.trim()) out.icon = raw.icon.trim();
+  if (typeof raw.notes === "string" && raw.notes.trim()) out.notes = raw.notes.trim();
 
   out.roads = (Array.isArray(raw.roads) ? raw.roads : []).map(normalizePath).filter(Boolean);
   out.rivers = (Array.isArray(raw.rivers) ? raw.rivers : []).map(normalizePath).filter(Boolean);
@@ -173,4 +179,20 @@ export function hexKey(col, row) {
 export function parseHexKey(key) {
   const [col, row] = key.split(",").map(Number);
   return { col, row };
+}
+
+/** Applies a partial-field patch to each of several hexes in a single scene
+ * write - used by the Hex Overview's inline edits and bulk actions so N
+ * edited hexes cost one setFlag call, not N (mirrors fog.js's revealArea()).
+ * `patches` is [{ col, row, patch }]; `patch` is a partial raw hex object
+ * (e.g. { alt: "..." } or { zone: [...] }) shallow-merged onto that hex's
+ * existing raw content before normalization. */
+export async function applyHexPatches(scene, patches) {
+  const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
+  const merged = { ...raw };
+  for (const { col, row, patch } of patches) {
+    const key = hexKey(col, row);
+    merged[key] = normalizeHexContent({ ...(merged[key] ?? {}), ...patch });
+  }
+  return scene.setFlag(MODULE_ID, "hexes", merged);
 }
