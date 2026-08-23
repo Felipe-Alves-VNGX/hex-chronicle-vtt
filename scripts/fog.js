@@ -49,6 +49,16 @@ export async function toggleHex(col, row, scene = canvas.scene) {
   return scene.setFlag(MODULE_ID, "explored", merged);
 }
 
+/** Sets the same explored value for several hexes in one write - the Hex
+ * Overview's bulk "Reveal/Hide Terrain" actions use this instead of one
+ * toggleHex()/setFlag() per selected row. */
+export async function setExploredMany(cells, value, scene = canvas.scene) {
+  const current = getExploredMap(scene);
+  const merged = { ...current };
+  for (const [c, r] of cells) merged[hexKey(c, r)] = value;
+  return scene.setFlag(MODULE_ID, "explored", merged);
+}
+
 export async function resetFog(scene = canvas.scene) {
   return scene.unsetFlag(MODULE_ID, "explored");
 }
@@ -96,6 +106,15 @@ export async function setStructureRevealed(col, row, value, scene = canvas.scene
   const key = hexKey(col, row);
   const current = getStructureRevealedMap(scene);
   return scene.setFlag(MODULE_ID, "structuresRevealed", { ...current, [key]: !!value });
+}
+
+/** Bulk counterpart to setStructureRevealed(), same one-write shape as
+ * setExploredMany() above. */
+export async function setStructureRevealedMany(cells, value, scene = canvas.scene) {
+  const current = getStructureRevealedMap(scene);
+  const merged = { ...current };
+  for (const [c, r] of cells) merged[hexKey(c, r)] = !!value;
+  return scene.setFlag(MODULE_ID, "structuresRevealed", merged);
 }
 
 /** Raw, un-gated hex content (normalized), or null if nothing is authored
