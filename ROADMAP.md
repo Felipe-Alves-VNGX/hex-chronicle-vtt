@@ -3,6 +3,46 @@
 Where the port stands, and what's been discussed for later. See [CREDITS.md](CREDITS.md)
 for attribution and [README.md](README.md) for usage.
 
+## Implementado, ainda sem teste ao vivo (v0.4.0)
+
+Diferente de tudo abaixo (que passou por sessão real no Foundry antes de ser
+marcado "concluído"), o que segue foi implementado mas **não** verificado
+contra um mundo Foundry real ainda - sinalizado explicitamente aqui em vez de
+misturado com o resto, já que essa distinção importa pra quem for testar a
+seguir.
+
+- **Hex Chronicle por cena, desligado por padrão** (`scripts/scene-settings.js`):
+  toda a camada/ferramentas agora dependem de uma flag de cena
+  (`flags.hex-chronicle-vtt.enabled`, padrão `false`) - uma cena que nunca
+  ligou isso não desenha nada (`render.js#renderHexes` retorna cedo) nem
+  mostra o grupo de ferramentas na barra (`init.js`, `visible` condicional).
+- **Aba "Hex Chronicle" na configuração de cena** (`scripts/scene-config.js` +
+  `templates/scene-hex-tab.hbs`): injetada via hook `renderSceneConfig` no
+  DOM da própria ficha de configuração de cena do Foundry (não existe API
+  suportada pra um módulo adicionar aba a uma ficha AppV2 do core) - o botão
+  liga/desliga a cena, além de cor/estilo (sólido, tracejado, pontilhado) e
+  espessura da linha divisória entre hexágonos, e três campos JSON pra
+  biomas/estruturas/zonas customizados desta cena (aditivos aos padrões do
+  módulo, mesmo princípio do `paletteOverride` que já existia em nível de
+  mundo). **Ponto de maior incerteza**: a técnica usada pra integrar com o
+  sistema de abas do ApplicationV2 (`data-action="tab"` + `data-tab`/
+  `data-group`, replicando os atributos que o core usa) é a documentada,
+  mas nunca foi confirmada contra uma ficha de cena real - tem um fallback
+  manual de clique como reforço, mas isso e a suposição sobre a marcação
+  (`.tab[data-group]`) precisam de verificação ao vivo.
+- **Zonas com hachura por padrão, não mais só contorno tracejado**
+  (`render.js#drawZoneHatch`): cada zona agora pinta um padrão de hachura
+  translúcido (diagonal, cruzado, horizontal, vertical ou pontilhado) sobre
+  os hexágonos que a compõem, clipado ao hexágono individual (não ao
+  contorno do cluster) via um clipper Cyrus-Beck próprio - preserva a cor do
+  terreno por baixo em vez de escondê-la, e cada zona pode ter seu próprio
+  padrão/cor via o JSON de zonas da cena. O contorno tracejado do cluster
+  continua existindo, mais sutil, por cima da hachura.
+- **Estruturas/ícones customizados por cena** (`scripts/hex-icon-picker.js`):
+  a grade de ícones do editor de hex agora soma as estruturas customizadas
+  da cena (JSON) aos ícones nativos do módulo - `icon` pode ser um nome já
+  embutido ou um caminho/URL pra uma imagem própria.
+
 ## Concluído (v0.1.0 → v0.2.6)
 
 ### Núcleo do módulo

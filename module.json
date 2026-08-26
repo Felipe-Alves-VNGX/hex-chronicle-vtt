@@ -2,7 +2,7 @@
   "id": "hex-chronicle-vtt",
   "title": "Hex Chronicle",
   "description": "Interactive hex-crawl map editor and fog-of-war exploration layer for FoundryVTT, ported from the hex-chronicle Python tool by Guillaume Fouillet.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "13",
     "verified": "14",

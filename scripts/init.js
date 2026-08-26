@@ -4,6 +4,8 @@ import { registerAutoRevealHook, confirmResetFog } from "./fog.js";
 import { openImportDialog } from "./import.js";
 import { HexDirectory } from "./hex-directory.js";
 import { toggleLegend } from "./hex-legend.js";
+import { isHexEnabled } from "./scene-settings.js";
+import { registerSceneConfigTab } from "./scene-config.js";
 
 // Singleton so repeated clicks on the toolbar button re-focus the same
 // window instead of stacking up duplicates.
@@ -11,6 +13,7 @@ let hexDirectoryApp = null;
 
 Hooks.once("init", () => {
   registerSettings();
+  registerSceneConfigTab();
 
   CONFIG.Canvas.layers.hexChronicle = {
     layerClass: HexChronicleLayer,
@@ -38,6 +41,18 @@ Hooks.on("updateScene", (scene, changes) => {
   if (scene.id !== canvas.scene?.id) return;
   if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}`)) {
     canvas.hexChronicle?.refresh();
+  }
+  // The "enabled" toggle changes whether the whole control group even shows
+  // up in the toolbar (see getSceneControlButtons below), so the toolbar
+  // itself needs a re-render too - not just the canvas content. If a GM
+  // just switched it off while our tools were active, fall back to the
+  // token layer rather than leaving the canvas on a layer whose controls
+  // just disappeared out from under it.
+  if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.enabled`)) {
+    if (!isHexEnabled(scene) && canvas.activeLayer === canvas.hexChronicle) {
+      canvas.tokens?.activate();
+    }
+    ui.controls.render(true);
   }
 });
 
@@ -67,7 +82,10 @@ Hooks.on("getSceneControlButtons", (controls) => {
     title: "HEXCHRON.ControlTitle",
     layer: "hexChronicle",
     icon: "fa-solid fa-hexagon",
-    visible: true,
+    // Per-scene opt-in (default OFF, see scene-settings.js) - scenes that
+    // never turned this on don't clutter the toolbar with a tool group
+    // that would draw nothing anyway (renderHexes bails out the same way).
+    visible: isHexEnabled(canvas.scene),
     activeTool: "edit",
     tools: {
       edit: {

@@ -102,9 +102,9 @@ export function pathsToText(paths) {
  * sync in both directions. `terrainTypeSelect` is only read (for the base
  * terrain color shown as a faint tint under unpainted zones) and listened
  * to, never written. */
-export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
+export function attachTerrainDiagram(root, { textarea, terrainTypeSelect, terrainTypes = TERRAIN_TYPES }) {
   let zoneMap = textToZoneMap(textarea.value);
-  let armedType = TERRAIN_TYPES[0];
+  let armedType = terrainTypes[0];
 
   const wrap = document.createElement("div");
   wrap.className = "hc-terrain-diagram";
@@ -126,7 +126,7 @@ export function attachTerrainDiagram(root, { textarea, terrainTypeSelect }) {
   const paletteRow = document.createElement("div");
   paletteRow.className = "hc-brush-palette";
   const swatches = [];
-  for (const type of TERRAIN_TYPES) {
+  for (const type of terrainTypes) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hc-brush-swatch";

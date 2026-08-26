@@ -1,0 +1,52 @@
+<div class="hc-scene-tab-inner">
+  <p class="hint">{{localize "HEXCHRON.SceneEnableHint"}}</p>
+
+  <div class="form-group">
+    <label>{{localize "HEXCHRON.SceneEnableLabel"}}</label>
+    <input type="checkbox" name="flags.{{moduleId}}.enabled" {{#if enabled}}checked{{/if}} />
+  </div>
+
+  <fieldset>
+    <legend><i class="fa-solid fa-hexagon"></i> {{localize "HEXCHRON.SceneSectionGrid"}}</legend>
+    <p class="hint">{{localize "HEXCHRON.SceneGridHint"}}</p>
+
+    <div class="form-group">
+      <label>{{localize "HEXCHRON.SceneGridColor"}}</label>
+      <input type="color" name="flags.{{moduleId}}.grid.color" value="{{gridColor}}" />
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "HEXCHRON.SceneGridStyleLabel"}}</label>
+      <select name="flags.{{moduleId}}.grid.style">
+        {{selectOptions gridStyleOptions selected=gridStyle}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "HEXCHRON.SceneGridWidth"}}</label>
+      <input type="number" name="flags.{{moduleId}}.grid.width" value="{{gridWidth}}" min="1" step="0.5" placeholder="{{localize 'HEXCHRON.SceneGridWidthPlaceholder'}}" />
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><i class="fa-solid fa-mountain-sun"></i> {{localize "HEXCHRON.SceneSectionBiomes"}}</legend>
+    <p class="hint">{{localize "HEXCHRON.SceneBiomesHint"}}</p>
+    <textarea name="flags.{{moduleId}}.biomes" rows="5" data-json="true" placeholder="{{examples.biomes}}">{{biomes}}</textarea>
+    <p class="hc-json-invalid-hint">{{localize "HEXCHRON.SceneJsonInvalid"}}</p>
+  </fieldset>
+
+  <fieldset>
+    <legend><i class="fa-solid fa-tower-observation"></i> {{localize "HEXCHRON.SceneSectionStructures"}}</legend>
+    <p class="hint">{{localize "HEXCHRON.SceneStructuresHint"}}</p>
+    <textarea name="flags.{{moduleId}}.structures" rows="5" data-json="true" placeholder="{{examples.structures}}">{{structures}}</textarea>
+    <p class="hc-json-invalid-hint">{{localize "HEXCHRON.SceneJsonInvalid"}}</p>
+  </fieldset>
+
+  <fieldset>
+    <legend><i class="fa-solid fa-draw-polygon"></i> {{localize "HEXCHRON.SceneSectionZones"}}</legend>
+    <p class="hint">{{localize "HEXCHRON.SceneZonesHint"}}</p>
+    <p class="hint">{{localize "HEXCHRON.SceneZonesPatternsHint"}} {{#each zonePatterns}}<code>{{this}}</code>{{#unless @last}}, {{/unless}}{{/each}}</p>
+    <textarea name="flags.{{moduleId}}.zones" rows="5" data-json="true" placeholder="{{examples.zones}}">{{zones}}</textarea>
+    <p class="hc-json-invalid-hint">{{localize "HEXCHRON.SceneJsonInvalid"}}</p>
+  </fieldset>
+</div>
