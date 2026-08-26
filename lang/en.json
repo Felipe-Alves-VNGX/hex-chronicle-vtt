@@ -72,6 +72,27 @@
     "SettingAutoRevealRadius": "Auto-reveal radius (hex steps)",
     "SettingAutoRevealRadiusHint": "0 reveals only the hex the token enters; higher values also reveal that many rings of neighbors.",
     "SettingPalette": "Custom palette override (JSON)",
-    "SettingPaletteHint": "Optional JSON like {\"terrain\":{\"plains\":\"#90ee90\"},\"zone\":{\"dangerous\":\"#ff0000\"}} to override default colors."
+    "SettingPaletteHint": "Optional JSON like {\"terrain\":{\"plains\":\"#90ee90\"},\"zone\":{\"dangerous\":\"#ff0000\"}} to override default colors.",
+    "SceneEnableLabel": "Enable Hex Chronicle for this scene",
+    "SceneEnableHint": "Off by default. Turn this on to draw the hex grid/tools on this scene; leave it off for scenes that don't use a hex crawl.",
+    "SceneSectionGrid": "Grid Line",
+    "SceneGridHint": "Controls how the line between hexes is drawn on this scene.",
+    "SceneGridColor": "Color",
+    "SceneGridStyleLabel": "Style",
+    "SceneGridStyle": {
+      "solid": "Solid",
+      "dashed": "Dashed",
+      "dotted": "Dotted"
+    },
+    "SceneGridWidth": "Line width (px)",
+    "SceneGridWidthPlaceholder": "Automatic",
+    "SceneSectionBiomes": "Custom Biomes",
+    "SceneBiomesHint": "Optional JSON list of extra/overridden terrain types for this scene, e.g. [{\"id\":\"swamp\",\"label\":\"Swamp\",\"color\":\"#4b5d3a\"}]. Adds to the module's built-in terrain list - reusing a built-in id just recolors/relabels it. Leave blank to use only the built-in list.",
+    "SceneSectionStructures": "Custom Structures",
+    "SceneStructuresHint": "Optional JSON list of extra building icons for this scene, e.g. [{\"id\":\"watchtower\",\"label\":\"Watchtower\",\"icon\":\"fortin\"}]. \"icon\" can be one of the module's own bundled icon names (assets/icons/building/), or a full path/URL to your own image.",
+    "SceneSectionZones": "Custom Zones",
+    "SceneZonesHint": "Optional JSON list of zone styles for this scene, e.g. [{\"id\":\"dangerous\",\"label\":\"Dangerous\",\"pattern\":\"cross\",\"color\":\"#c0392b\"}]. Zones always render as a translucent hachure (never a solid fill) so the terrain underneath stays readable - \"pattern\" picks which hachure, \"color\" its tint. A zone with no entry here still renders (a generic green diagonal hachure), it just isn't distinguishable from other undefined zones.",
+    "SceneZonesPatternsHint": "Available patterns:",
+    "SceneJsonInvalid": "Invalid JSON - this override is being ignored until fixed."
   }
 }

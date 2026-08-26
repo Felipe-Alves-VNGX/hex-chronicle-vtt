@@ -19,11 +19,12 @@
  * doesn't have to leave the form to flip it.
  */
 import { MODULE_ID } from "./settings.js";
-import { normalizeHexContent, hexKey, TERRAIN_TYPES } from "./data-model.js";
+import { normalizeHexContent, hexKey } from "./data-model.js";
 import { isStructureRevealed, setStructureRevealed } from "./fog.js";
 import { openHexLink } from "./links.js";
 import { attachTerrainDiagram, attachPathDiagram } from "./hex-diagram.js";
 import { attachIconPicker } from "./hex-icon-picker.js";
+import { getEffectiveBiomes } from "./scene-settings.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -83,8 +84,9 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       // given a plain array - confirmed live: picking "heavy_woods" (index
       // 2) silently saved terrain.type as "2", not "heavy_woods", for
       // every hex ever set through this dropdown. An object maps each
-      // option's real value to its own label instead.
-      terrainTypes: Object.fromEntries(TERRAIN_TYPES.map((t) => [t, t])),
+      // option's real value to its own label instead. Merges in this
+      // scene's own custom biomes (scene-settings.js), if any.
+      terrainTypes: Object.fromEntries(getEffectiveBiomes(scene).map((b) => [b.id, b.label])),
       terrainType: content.terrain.type ?? "",
       mixedTerrain: content.terrain.mixed.map((m) => `${m.type}: ${m.sides.join(" ")}`).join("\n"),
       alt: content.alt,
@@ -104,7 +106,8 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const terrainTypeSelect = this.element.querySelector('select[name="terrainType"]');
     const mixedTerrainField = this.element.querySelector('textarea[name="mixedTerrain"]');
     if (terrainDiagramRoot && terrainTypeSelect && mixedTerrainField) {
-      attachTerrainDiagram(terrainDiagramRoot, { textarea: mixedTerrainField, terrainTypeSelect });
+      const terrainTypes = getEffectiveBiomes(canvas.scene).map((b) => b.id);
+      attachTerrainDiagram(terrainDiagramRoot, { textarea: mixedTerrainField, terrainTypeSelect, terrainTypes });
     }
 
     const pathDiagramRoot = this.element.querySelector(".hc-path-diagram-root");
@@ -117,7 +120,7 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const iconPickerRoot = this.element.querySelector(".hc-icon-picker-root");
     const iconInput = this.element.querySelector('input[name="icon"]');
     if (iconPickerRoot && iconInput) {
-      attachIconPicker(iconPickerRoot, { input: iconInput });
+      attachIconPicker(iconPickerRoot, { input: iconInput, scene: canvas.scene });
     }
 
     const linkInput = this.element.querySelector('input[name="link"]');

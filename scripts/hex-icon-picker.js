@@ -8,6 +8,7 @@
  * for a custom/hand-typed icon that isn't in this list.
  */
 import { MODULE_ID } from "./settings.js";
+import { getSceneStructures, structureIconSrc } from "./scene-settings.js";
 
 // Matches assets/icons/building/*.svg exactly - keep in sync if icons are
 // added or removed there.
@@ -17,7 +18,7 @@ const BUILDING_ICONS = [
   "temple", "village",
 ];
 
-export function attachIconPicker(root, { input }) {
+export function attachIconPicker(root, { input, scene = canvas.scene }) {
   const wrap = document.createElement("div");
   wrap.className = "hc-icon-picker";
 
@@ -27,15 +28,15 @@ export function attachIconPicker(root, { input }) {
 
   const swatches = [];
 
-  function makeSwatch(name) {
+  function makeSwatch(name, { src, tooltip } = {}) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hc-icon-swatch";
     btn.dataset.icon = name;
-    btn.dataset.tooltip = name || game.i18n.localize("HEXCHRON.IconNone");
+    btn.dataset.tooltip = tooltip ?? name ?? game.i18n.localize("HEXCHRON.IconNone");
     if (name) {
       const img = document.createElement("img");
-      img.src = `modules/${MODULE_ID}/assets/icons/building/${name}.svg`;
+      img.src = src ?? `modules/${MODULE_ID}/assets/icons/building/${name}.svg`;
       img.alt = name;
       btn.appendChild(img);
     } else {
@@ -52,6 +53,14 @@ export function attachIconPicker(root, { input }) {
 
   makeSwatch("");
   for (const name of BUILDING_ICONS) makeSwatch(name);
+  // This scene's own custom structure set (scene-settings.js), additive to
+  // the module's built-in icons - a GM can still hand-type an icon that's
+  // in neither list, the text input next to this grid stays editable too.
+  for (const structure of getSceneStructures(scene)) {
+    const src = structureIconSrc(structure.icon);
+    if (!src) continue;
+    makeSwatch(structure.id, { src, tooltip: structure.label || structure.id });
+  }
 
   function updateActive() {
     const current = input.value.trim();

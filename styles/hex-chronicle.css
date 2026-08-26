@@ -502,3 +502,54 @@
   border-width: 2px;
   border-style: dashed;
 }
+
+/* --- Scene Config "Hex Chronicle" tab (scene-config.js) --- */
+
+.hc-scene-tab-inner fieldset {
+  border: 1px solid var(--color-border-light-tertiary, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem 0.5rem;
+}
+
+.hc-scene-tab-inner legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hc-scene-tab-inner .hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0.1rem 0 0.4rem;
+}
+
+.hc-scene-tab-inner textarea {
+  width: 100%;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  resize: vertical;
+}
+
+.hc-scene-tab-inner textarea.hc-json-invalid {
+  border-color: #c0392b;
+  outline-color: #c0392b;
+}
+
+.hc-scene-tab-inner .hc-json-invalid-hint {
+  display: none;
+  color: #e06c5a;
+  font-size: 0.72rem;
+  margin: 0.15rem 0 0;
+}
+
+.hc-scene-tab-inner textarea.hc-json-invalid + .hc-json-invalid-hint {
+  display: block;
+}
+
+.hc-scene-tab-inner code {
+  font-size: 0.75rem;
+}
