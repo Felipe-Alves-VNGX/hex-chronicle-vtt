@@ -157,10 +157,7 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     for (const btn of this.element.querySelectorAll('[data-action="addZone"]')) {
-      btn.addEventListener("click", () => {
-        const container = btn.closest(".hc-overview-zones");
-        this.#addZoneTag(Number(container.dataset.col), Number(container.dataset.row));
-      });
+      btn.addEventListener("click", () => this.#startZoneAdd(btn.closest(".hc-overview-zones")));
     }
 
     const search = this.element.querySelector('input[name="search"]');
@@ -237,8 +234,8 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.querySelector('[data-action="bulkHideTerrain"]')?.addEventListener("click", () => this.#bulkSetExplored(false));
     this.element.querySelector('[data-action="bulkRevealStructure"]')?.addEventListener("click", () => this.#bulkSetStructure(true));
     this.element.querySelector('[data-action="bulkHideStructure"]')?.addEventListener("click", () => this.#bulkSetStructure(false));
-    this.element.querySelector('[data-action="bulkAddZone"]')?.addEventListener("click", () => this.#bulkZoneTag(true));
-    this.element.querySelector('[data-action="bulkRemoveZone"]')?.addEventListener("click", () => this.#bulkZoneTag(false));
+    this.element.querySelector('[data-action="bulkAddZone"]')?.addEventListener("click", (event) => this.#startBulkZoneTag(event.currentTarget, true));
+    this.element.querySelector('[data-action="bulkRemoveZone"]')?.addEventListener("click", (event) => this.#startBulkZoneTag(event.currentTarget, false));
     this.element.querySelector('[data-action="bulkClear"]')?.addEventListener("click", () => this.#clearSelectionUI());
   }
 
@@ -291,9 +288,57 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     return normalizeHexContent(raw).zone;
   }
 
-  async #addZoneTag(col, row) {
-    const tag = (window.prompt(game.i18n.localize("HEXCHRON.OverviewAddZoneTagPrompt")) ?? "").trim();
-    if (!tag) return;
+  /** Replaces the "+" button in one row's zone-chip strip with a small
+   * text input (autocomplete via the shared #hc-overview-zone-suggestions
+   * datalist) instead of a native window.prompt() - Enter/blur commits,
+   * Escape/an empty blur cancels back to the button, same inline-editing
+   * feel as #startInlineEdit() above. */
+  #startZoneAdd(container) {
+    if (container.querySelector(".hc-overview-zone-input")) return;
+    const addBtn = container.querySelector('[data-action="addZone"]');
+    addBtn.hidden = true;
+
+    const col = Number(container.dataset.col);
+    const row = Number(container.dataset.row);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "hc-overview-zone-input";
+    input.setAttribute("list", "hc-overview-zone-suggestions");
+    input.placeholder = game.i18n.localize("HEXCHRON.ZoneTagAddPlaceholder");
+    container.insertBefore(input, addBtn);
+    input.focus();
+
+    let settled = false;
+    const cancel = () => {
+      if (settled) return;
+      settled = true;
+      input.remove();
+      addBtn.hidden = false;
+    };
+    const commit = async () => {
+      if (settled) return;
+      settled = true;
+      const tag = input.value.trim();
+      input.remove();
+      addBtn.hidden = false;
+      if (tag) await this.#addZoneTag(col, row, tag);
+    };
+
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        input.blur();
+      }
+      if (event.key === "Escape") {
+        input.removeEventListener("blur", commit);
+        cancel();
+      }
+    });
+  }
+
+  async #addZoneTag(col, row, tag) {
     const current = await this.#currentZoneList(col, row);
     if (current.includes(tag)) return;
     await applyHexPatches(canvas.scene, [{ col, row, patch: { zone: [...current, tag] } }]);
@@ -339,10 +384,54 @@ export class HexOverview extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#clearSelectionUI();
   }
 
-  async #bulkZoneTag(add) {
-    const promptKey = add ? "HEXCHRON.OverviewAddZoneTagPrompt" : "HEXCHRON.OverviewRemoveZoneTagPrompt";
-    const tag = (window.prompt(game.i18n.localize(promptKey)) ?? "").trim();
-    if (!tag) return;
+  /** Same inline-input swap as #startZoneAdd(), scoped to the bulk-action
+   * bar instead of one row: replaces both zone buttons with a single text
+   * input (autocomplete via the shared datalist) so the GM isn't stuck
+   * typing into a bare window.prompt() for a bulk tag either. */
+  #startBulkZoneTag(triggerBtn, add) {
+    const group = triggerBtn.closest(".hc-overview-bulk-zone-group");
+    if (group.querySelector(".hc-overview-bulk-zone-input")) return;
+    const buttons = [...group.querySelectorAll("button")];
+    for (const btn of buttons) btn.hidden = true;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "hc-overview-bulk-zone-input";
+    input.setAttribute("list", "hc-overview-zone-suggestions");
+    input.placeholder = game.i18n.localize("HEXCHRON.ZoneTagAddPlaceholder");
+    group.appendChild(input);
+    input.focus();
+
+    let settled = false;
+    const cancel = () => {
+      if (settled) return;
+      settled = true;
+      input.remove();
+      for (const btn of buttons) btn.hidden = false;
+    };
+    const commit = async () => {
+      if (settled) return;
+      settled = true;
+      const tag = input.value.trim();
+      input.remove();
+      for (const btn of buttons) btn.hidden = false;
+      if (tag) await this.#bulkZoneTag(add, tag);
+    };
+
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        input.blur();
+      }
+      if (event.key === "Escape") {
+        input.removeEventListener("blur", commit);
+        cancel();
+      }
+    });
+  }
+
+  async #bulkZoneTag(add, tag) {
     const scene = canvas.scene;
     const raw = scene.getFlag(MODULE_ID, "hexes") ?? {};
     const patches = this.#selectedCells().map(([col, row]) => {

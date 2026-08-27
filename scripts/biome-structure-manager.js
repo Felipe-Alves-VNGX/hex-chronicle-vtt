@@ -28,6 +28,12 @@ function getFilePickerImpl() {
   return foundry.applications?.apps?.FilePicker?.implementation ?? globalThis.FilePicker;
 }
 
+// "heavy_woods" -> "Heavy Woods" - only used to make the built-in list read
+// naturally; the actual stored/compared value is still the raw slug.
+function titleCase(slug) {
+  return slug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export class BiomeStructureManager extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: "hex-chronicle-registry-manager",
@@ -48,11 +54,19 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
   #newStructureName = "";
 
   async _prepareContext() {
+    const customBiomes = Object.entries(getCustomBiomes()).map(([slug, biome]) => ({ slug, ...biome }));
+    const customStructures = Object.entries(getCustomStructures()).map(([slug, structure]) => ({ slug, ...structure }));
     return {
-      builtinBiomes: TERRAIN_TYPES,
-      customBiomes: Object.entries(getCustomBiomes()).map(([slug, biome]) => ({ slug, ...biome })),
-      builtinStructures: BUILDING_ICONS,
-      customStructures: Object.entries(getCustomStructures()).map(([slug, structure]) => ({ slug, ...structure })),
+      builtinBiomes: TERRAIN_TYPES.map((slug) => ({ slug, name: titleCase(slug) })),
+      customBiomes,
+      hasCustomBiomes: customBiomes.length > 0,
+      builtinStructures: BUILDING_ICONS.map((slug) => ({
+        slug,
+        name: titleCase(slug),
+        src: `modules/${MODULE_ID}/assets/icons/building/${slug}.svg`,
+      })),
+      customStructures,
+      hasCustomStructures: customStructures.length > 0,
       newStructurePath: this.#newStructurePath,
       newStructureName: this.#newStructureName,
     };
@@ -60,6 +74,17 @@ export class BiomeStructureManager extends HandlebarsApplicationMixin(Applicatio
 
   async _onRender(context, options) {
     await super._onRender(context, options);
+
+    // Live swatch preview next to the color picker, since the native
+    // <input type="color"> swatch is tiny and inconsistent across
+    // browsers - this one updates as the GM picks, before "Add" is clicked.
+    const newBiomeColor = this.element.querySelector('input[name="newBiomeColor"]');
+    const newBiomePreview = this.element.querySelector('[data-preview="new-biome"]');
+    if (newBiomeColor && newBiomePreview) {
+      newBiomeColor.addEventListener("input", () => {
+        newBiomePreview.style.backgroundColor = newBiomeColor.value;
+      });
+    }
 
     this.element.querySelector('[data-action="addBiome"]')?.addEventListener("click", async () => {
       const nameInput = this.element.querySelector('input[name="newBiomeName"]');
