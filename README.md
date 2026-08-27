@@ -74,12 +74,34 @@ is intentionally left with the "latest" manifest URL but no `download` -
 that field is only meaningful per-release and is filled in by the
 workflow, not by hand.
 
+## Per-scene configuration
+
+Hex Chronicle is **off by default on every scene**. Open a scene's
+**Configure Scene** dialog (right-click it in the Scenes sidebar, or the
+gear icon while it's active) and switch to the new **Hex Chronicle** tab:
+
+- **Enable Hex Chronicle for this scene** - the master toggle. Off, the
+  scene renders nothing and the toolbar's Hex Chronicle group doesn't show
+  up at all; on, everything under "Usage" below becomes available.
+- **Grid Line** - color, style (solid/dashed/dotted), and width for the line
+  drawn between hexes on this scene.
+- **Custom Biomes / Structures / Zones** - optional JSON lists, one per
+  section, to extend this scene's own terrain types, building icons, and
+  zone styles beyond the module's built-ins (same idea as the world-level
+  palette override below, just scoped to one scene and covering more than
+  just color). Reusing a built-in id just recolors/relabels it instead of
+  adding a duplicate. See the hint text under each field for the exact
+  shape and an example. Zones always render as a translucent hachure
+  (diagonal/cross/horizontal/vertical/dots), never a solid fill, so the
+  terrain underneath stays readable - the JSON's `pattern`/`color` pick
+  which hachure and tint a given zone id uses.
+
 ## Usage
 
 A new **Hex Chronicle** control group appears in the scene controls (left
-toolbar) when a scene is active. Hovering the canvas with any tool below
-selected outlines whichever hex the cursor is over, so you can see what a
-click will land on before committing to it.
+toolbar) once the scene above has Hex Chronicle enabled. Hovering the canvas
+with any tool below selected outlines whichever hex the cursor is over, so
+you can see what a click will land on before committing to it.
 
 - **Edit Hex** (GM; does nothing yet for players - see "Known limitations"
   in [ROADMAP.md](ROADMAP.md)): click a hex cell to open its editor -

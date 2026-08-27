@@ -411,3 +411,14 @@ do `data-group` real de uma aba existente em vez de assumir um nome fixo):
   equivalente pra esconder isso de jogadores. Existe agora um toggle por cena
   ("mostrar contornos de zona pra jogadores") que permite ao GM optar por
   exibi-las mesmo assim quando isso não for um problema.
+- **Zonas com hachura por padrão** (`render.js#drawZoneHatch`): trazido de
+  uma implementação paralela que havia divergido em `main` e foi reconciliada
+  de volta nesta branch. Cada zona pinta um padrão translúcido (diagonal,
+  cruzado, horizontal, vertical ou pontilhado) sobre os hexágonos que a
+  compõem, clipado ao hexágono individual via um clipper Cyrus-Beck
+  (`clipSegmentToConvexPolygon`) - preserva a cor do terreno por baixo em vez
+  de escondê-la. O contorno tracejado do cluster continua por cima, mais
+  sutil. Os padrões por zona vêm de um mapa fixo do módulo
+  (`DEFAULT_ZONE_PATTERNS`), não de um JSON por cena - a versão de `main`
+  permitia customizar isso por cena, mas foi descartada por competir
+  diretamente com `custom-registry.js`/`biome-structure-manager.js`.

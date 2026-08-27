@@ -190,7 +190,7 @@ export function neighborsWithinRange(col, row, range) {
   return [...seen.values()];
 }
 
-function pointInPolygon(point, polygon) {
+export function pointInPolygon(point, polygon) {
   // Standard ray-casting test.
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {

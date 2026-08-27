@@ -4,17 +4,17 @@
  * stacked bottom-to-top exactly like the original's layer order (content,
  * then grid, then coordinate numbers, then zone boundaries on top).
  *
- * Zone boundaries (dashed cluster outlines) are GM-only by default: they can
- * leak the shape of a secret area to players before they've explored it, and
- * unlike terrain they have no "unknown" fallback that hides that shape. A
- * GM who wants players to see them anyway can opt in per-scene via the
- * "show zone outlines to players" toggle on the Hex Chronicle Scene Config
- * tab (see isZoneVisibleToPlayers() in settings.js).
+ * Zone boundaries (hachure fill + dashed cluster outline) are GM-only by
+ * default: they can leak the shape of a secret area to players before
+ * they've explored it, and unlike terrain they have no "unknown" fallback
+ * that hides that shape. A GM who wants players to see them anyway can opt
+ * in per-scene via the "show zone outlines to players" toggle on the Hex
+ * Chronicle Scene Config tab (see isZoneVisibleToPlayers() in settings.js).
  */
 import { MODULE_ID, getRadius, getOrigin, getPaletteOverride, toColorNumber, getGridStyle, isZoneVisibleToPlayers } from "./settings.js";
 import { getCustomBiomes, getCustomStructures } from "./custom-registry.js";
 import { hexKey, parseHexKey, resolveIcon, normalizeHexContent } from "./data-model.js";
-import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex } from "./geometry.js";
+import { hexShapePoints, zonePolygon, fineRingPoints, tileCenter, neighbors, neighborsWithinRange, pointToHex, pointInPolygon } from "./geometry.js";
 import { zoneClusterLoops } from "./zone-cluster.js";
 import { getEffectiveContent } from "./fog.js";
 
@@ -52,6 +52,14 @@ const DEFAULT_ZONE_COLORS = {
   secured: 0x3f9142,
 };
 
+// Zones have no built-in "unknown" fallback the way terrain does, so an
+// unrecognized zone id still needs *some* pattern - "diagonal" reads as a
+// generic hatch without implying anything about what the zone means.
+const DEFAULT_ZONE_PATTERNS = {
+  secured: "diagonal",
+};
+const FALLBACK_ZONE_PATTERN = "diagonal";
+
 const ROAD_COLOR = 0x8b5a2b;
 const RIVER_COLOR = 0x3a7ca5;
 
@@ -71,9 +79,10 @@ export function invalidateCustomStructureTextures() {
 }
 
 /** Exposed so the hex editor's visual terrain-brush diagram (hex-diagram.js)
- * paints with the exact same colors (including any world palette override)
- * as the actual map render - keeps the picker WYSIWYG instead of drifting
- * out of sync with a second hardcoded color list. */
+ * and the on-screen legend (hex-legend.js) paint with the exact same colors
+ * (including any world palette override, and this scene's own custom
+ * biomes) as the actual map render - keeps every picker/preview WYSIWYG
+ * instead of drifting out of sync with a second hardcoded color list. */
 export function palette(scene = canvas.scene) {
   const custom = Object.fromEntries(
     Object.entries(getCustomBiomes())
@@ -84,6 +93,7 @@ export function palette(scene = canvas.scene) {
   return {
     terrain: { ...DEFAULT_TERRAIN_COLORS, ...custom, ...(override.terrain ?? {}) },
     zone: { ...DEFAULT_ZONE_COLORS, ...(override.zone ?? {}) },
+    zonePatterns: DEFAULT_ZONE_PATTERNS,
   };
 }
 
@@ -92,9 +102,9 @@ function terrainColor(type, scene) {
   return p.terrain[type] ?? p.terrain.unknown;
 }
 
-function zoneColor(name, scene) {
+function zoneStyle(name, scene) {
   const p = palette(scene);
-  return p.zone[name] ?? 0x228b22;
+  return { color: p.zone[name] ?? 0x228b22, pattern: p.zonePatterns[name] ?? FALLBACK_ZONE_PATTERN };
 }
 
 function drawHexPolygon(graphics, points, { fillColor, alpha = 1 } = {}) {
@@ -170,8 +180,8 @@ async function getIconTexture(iconPath) {
     // terrain "type" is free text (custom terrains are meant to be
     // supported via custom CSS in the original tool), so a typo or a
     // made-up type here is normal too, not a bug to report loudly.
-    if (!iconPath.startsWith("terrain/")) {
-      console.warn(`${MODULE_ID} | icon not found: ${iconPath}`, err);
+    if (!iconPath.includes("/terrain/")) {
+      console.warn(`${MODULE_ID} | icon not found: ${url}`, err);
     }
     textureCache.set(iconPath, null);
     return null;
@@ -179,12 +189,12 @@ async function getIconTexture(iconPath) {
 }
 
 async function preloadIcons(contents) {
-  const paths = new Set();
+  const icons = new Set();
   for (const content of contents) {
     const icon = resolveIcon(content);
-    if (icon) paths.add(icon);
+    if (icon) icons.add(icon);
   }
-  await Promise.all([...paths].map(getIconTexture));
+  await Promise.all([...icons].map(getIconTexture));
 }
 
 /** Renders every hex + its neighborhood into `container` (a PIXI.Container
@@ -238,7 +248,7 @@ export async function renderHexes(container, scene, { isGM }) {
   const contentLayer = new PIXI.Container();
   const gridLayer = new PIXI.Graphics();
   const numbersLayer = new PIXI.Container();
-  const zonesLayer = new PIXI.Graphics();
+  const zonesLayer = new PIXI.Container();
   container.addChild(contentLayer, gridLayer, numbersLayer, zonesLayer);
 
   for (const [key, content] of effectiveByKey) {
@@ -358,21 +368,118 @@ function drawNumber(container, col, row, radius, origin) {
   container.addChild(text);
 }
 
-function drawZones(graphics, hexes, radius, origin, scene) {
+/** Zones default to a hachure (hatch) fill rather than a solid one - a
+ * translucent line/dot pattern reads as "this area is marked" without
+ * hiding the terrain color underneath it, unlike a flat fill would. Each
+ * zone gets its own pattern + color (module default, or a world palette
+ * override - see palette()/zoneStyle() above), so multiple zones on the
+ * same map stay visually distinct. The hatch is drawn per member hex
+ * (clipped to that hex's own polygon, see clipSegmentToConvexPolygon
+ * below), not the zone cluster as a whole - a hole in a cluster (a
+ * non-member hex fully surrounded by members, see zone-cluster.js) is then
+ * automatically excluded, since a hex with no zone simply gets no hatch. */
+function drawZones(parent, hexes, radius, origin, scene) {
+  const hatchGraphics = new PIXI.Graphics();
+  const outlineGraphics = new PIXI.Graphics();
+  parent.addChild(hatchGraphics, outlineGraphics);
+
   const byZone = new Map();
   for (const [key, content] of hexes) {
     const { col, row } = parseHexKey(key);
     for (const zone of content.zone) {
       if (!byZone.has(zone)) byZone.set(zone, []);
       byZone.get(zone).push([col, row]);
+      drawZoneHatch(hatchGraphics, col, row, radius, origin, zoneStyle(zone, scene));
     }
   }
 
-  const strokeW = Math.max(1, radius / 15);
+  const strokeW = Math.max(1, radius / 20);
   for (const [zone, cells] of byZone) {
-    const loops = zoneClusterLoops(cells, radius, origin);
-    for (const loop of loops) {
-      strokeDashedPolyline(graphics, loop, { color: zoneColor(zone, scene), width: strokeW });
+    const { color } = zoneStyle(zone, scene);
+    for (const loop of zoneClusterLoops(cells, radius, origin)) {
+      strokeDashedPolyline(outlineGraphics, loop, { color, width: strokeW, alpha: 0.85 });
     }
+  }
+}
+
+/** Clips segment p0->p1 against a convex polygon (Cyrus-Beck), returning
+ * the surviving [start, end] pair or null if the segment misses the
+ * polygon entirely. Doesn't assume a winding order - each edge's inward
+ * normal is oriented using the polygon's own centroid, so it works for
+ * hexShapePoints()'s point list regardless of draw order. */
+function clipSegmentToConvexPolygon(p0, p1, polygon) {
+  const cx = polygon.reduce((s, p) => s + p.x, 0) / polygon.length;
+  const cy = polygon.reduce((s, p) => s + p.y, 0) / polygon.length;
+  const dx = p1.x - p0.x, dy = p1.y - p0.y;
+  let t0 = 0, t1 = 1;
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+    let nx = -(b.y - a.y), ny = b.x - a.x;
+    if (nx * (cx - a.x) + ny * (cy - a.y) < 0) { nx = -nx; ny = -ny; }
+    const denom = dx * nx + dy * ny;
+    const num = (a.x - p0.x) * nx + (a.y - p0.y) * ny;
+    if (Math.abs(denom) < 1e-9) {
+      if (num > 0) return null; // parallel to this edge and entirely outside it
+      continue;
+    }
+    const t = num / denom;
+    if (denom > 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+  }
+  if (t0 > t1) return null;
+  return [
+    { x: p0.x + dx * t0, y: p0.y + dy * t0 },
+    { x: p0.x + dx * t1, y: p0.y + dy * t1 },
+  ];
+}
+
+/** Draws one hex's hatch fill, clipped to its own hexagon so adjacent
+ * zone/non-zone hexes never bleed into each other. */
+function drawZoneHatch(graphics, col, row, radius, origin, { color, pattern }) {
+  const poly = hexShapePoints(col, row, radius, origin);
+  const center = tileCenter(col, row, radius, origin);
+  const spacing = Math.max(4, radius * 0.28);
+  const lineWidth = Math.max(1, radius / 45);
+  const alpha = 0.55;
+  const span = radius * 1.3;
+
+  const drawLinesAt = (angleDeg) => {
+    const rad = (angleDeg * Math.PI) / 180;
+    const dx = Math.cos(rad), dy = Math.sin(rad);
+    const px = -dy, py = dx; // perpendicular - steps between parallel lines
+    const steps = Math.ceil(span / spacing);
+    graphics.lineStyle(lineWidth, color, alpha);
+    for (let i = -steps; i <= steps; i++) {
+      const ox = center.x + px * i * spacing;
+      const oy = center.y + py * i * spacing;
+      const clipped = clipSegmentToConvexPolygon(
+        { x: ox - dx * span, y: oy - dy * span },
+        { x: ox + dx * span, y: oy + dy * span },
+        poly
+      );
+      if (!clipped) continue;
+      graphics.moveTo(clipped[0].x, clipped[0].y).lineTo(clipped[1].x, clipped[1].y);
+    }
+  };
+
+  if (pattern === "dots") {
+    graphics.beginFill(color, alpha);
+    const dotRadius = Math.max(1, radius * 0.04);
+    for (let x = -radius; x <= radius; x += spacing) {
+      for (let y = -radius; y <= radius; y += spacing) {
+        const p = { x: center.x + x, y: center.y + y };
+        if (pointInPolygon(p, poly)) graphics.drawCircle(p.x, p.y, dotRadius);
+      }
+    }
+    graphics.endFill();
+  } else if (pattern === "cross") {
+    drawLinesAt(45);
+    drawLinesAt(135);
+  } else if (pattern === "horizontal") {
+    drawLinesAt(0);
+  } else if (pattern === "vertical") {
+    drawLinesAt(90);
+  } else {
+    drawLinesAt(45); // "diagonal" and any unrecognized pattern
   }
 }

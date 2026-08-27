@@ -44,20 +44,29 @@ Hooks.on("updateScene", (scene, changes) => {
   if (scene.id !== canvas.scene?.id) return;
   if (foundry.utils.hasProperty(changes, `flags.${MODULE_ID}`)) {
     canvas.hexChronicle?.refresh();
-    // The scene-controls toolbar builds its `visible` flag for our whole
-    // control group (and each tool button's own visibility, per
-    // sceneOverrides.tools) fresh on every render (see
-    // getSceneControlButtons below), but nothing else re-renders it just
-    // because a scene flag changed - without this, toggling "enabled" or a
-    // per-tool visibility checkbox in the Scene Config tab wouldn't
-    // hide/show the toolbar/buttons until the next unrelated re-render
-    // (e.g. switching scenes).
-    if (
-      foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.enabled`) ||
-      foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.sceneOverrides.tools`)
-    ) {
-      ui.controls.render();
-    }
+  }
+  // The scene-controls toolbar builds its `visible` flag for our whole
+  // control group (and each tool button's own visibility, per
+  // sceneOverrides.tools) fresh on every render (see getSceneControlButtons
+  // below), but nothing else re-renders it just because a scene flag
+  // changed - without this, toggling "enabled" or a per-tool visibility
+  // checkbox in the Scene Config tab wouldn't hide/show the toolbar/buttons
+  // until the next unrelated re-render (e.g. switching scenes).
+  if (
+    foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.enabled`) ||
+    foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.sceneOverrides.tools`)
+  ) {
+    ui.controls.render();
+  }
+  // If a GM just switched "enabled" off while our tools were active, fall
+  // back to the token layer rather than leaving the canvas on a layer whose
+  // controls just disappeared out from under it.
+  if (
+    foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.enabled`) &&
+    !isModuleEnabledOnScene(scene) &&
+    canvas.activeLayer === canvas.hexChronicle
+  ) {
+    canvas.tokens?.activate();
   }
 });
 
