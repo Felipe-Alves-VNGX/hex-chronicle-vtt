@@ -283,6 +283,69 @@
   font-size: 0.9rem;
 }
 
+/* --- Visual zone-tag chip editor --- */
+
+.hex-chronicle-editor .hc-zone-editor {
+  margin-top: 0.2rem;
+}
+
+.hex-chronicle-editor .hc-zone-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  min-height: 1.6rem;
+  align-items: center;
+}
+
+.hex-chronicle-editor .hc-zone-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--color-border-light-tertiary, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  padding: 0.15rem 0.35rem 0.15rem 0.6rem;
+}
+
+.hex-chronicle-editor .hc-zone-chip button {
+  border: none;
+  background: none;
+  padding: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  border-radius: 50%;
+}
+
+.hex-chronicle-editor .hc-zone-chip button:hover {
+  opacity: 1;
+  background: var(--color-border-highlight, #ff6400);
+  color: #fff;
+}
+
+.hex-chronicle-editor .hc-zone-empty {
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.hex-chronicle-editor .hc-zone-add-row {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.hex-chronicle-editor .hc-zone-add-input {
+  flex: 1;
+}
+
+.hex-chronicle-editor .hc-zone-add-btn {
+  width: auto;
+  padding: 0 0.6rem;
+}
+
 /* --- Hex overview --- */
 
 .hex-chronicle-overview {
@@ -410,6 +473,27 @@
   opacity: 0.5;
   cursor: pointer;
   padding: 0 0.2rem;
+}
+
+.hc-overview-zone-input {
+  width: 6.5rem;
+  font-size: 0.68rem;
+  padding: 0.05rem 0.3rem;
+  height: auto;
+  margin: 0.1rem 0.15rem 0 0;
+}
+
+.hc-overview-bulk-zone-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hc-overview-bulk-zone-input {
+  width: 9rem;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  height: auto;
 }
 
 .hc-overview-alt {
@@ -614,41 +698,179 @@
 
 /* --- Biome/structure manager --- */
 
-.hex-chronicle-registry-manager .hc-registry-row {
+.hex-chronicle-registry-manager fieldset {
+  margin-bottom: 0.75rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.55;
+  margin: 0.6rem 0 0.3rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-subheading:first-child {
+  margin-top: 0;
+}
+
+.hex-chronicle-registry-manager .hc-registry-empty {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.hex-chronicle-registry-manager .hc-registry-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-card {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 0;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--color-border-light-tertiary, rgba(255, 255, 255, 0.12));
+  border-radius: 5px;
 }
 
 .hex-chronicle-registry-manager .hc-registry-swatch {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   flex: 0 0 auto;
 }
 
-.hex-chronicle-registry-manager .hc-registry-icon,
-.hex-chronicle-registry-manager .hc-registry-icon-preview {
-  width: 24px;
-  height: 24px;
+.hex-chronicle-registry-manager .hc-registry-icon {
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   flex: 0 0 auto;
 }
 
-.hex-chronicle-registry-manager .hc-registry-name {
+.hex-chronicle-registry-manager .hc-registry-card-info {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hex-chronicle-registry-manager .hc-registry-name {
+  font-size: 0.9rem;
 }
 
 .hex-chronicle-registry-manager .hc-registry-slug {
-  opacity: 0.6;
-  font-size: 0.85em;
+  opacity: 0.55;
+  font-size: 0.72rem;
 }
 
-.hex-chronicle-registry-manager .hc-registry-add {
+.hex-chronicle-registry-manager .hc-registry-remove {
+  flex: 0 0 auto;
+  width: auto;
+  border: none;
+  background: none;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-card:hover .hc-registry-remove {
+  opacity: 0.85;
+}
+
+.hex-chronicle-registry-manager .hc-registry-remove:hover {
+  opacity: 1;
+  color: var(--color-border-highlight, #ff6400);
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-card {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.04));
+  border: 1px dashed var(--color-border-light-tertiary, rgba(255, 255, 255, 0.25));
+  border-radius: 5px;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-title {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin: 0 0 0.35rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 0.4rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-row input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-row input[type="color"] {
+  flex: 0 0 auto;
+  width: 2.6rem;
+  padding: 0.1rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-add-btn {
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
+}
+
+.hex-chronicle-registry-manager .hc-registry-image-btn {
+  flex: 0 0 auto;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.08));
+}
+
+.hex-chronicle-registry-manager .hc-registry-image-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hex-chronicle-registry-manager .hc-registry-builtin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-builtin-chip {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.06));
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-builtin-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hex-chronicle-registry-manager .hc-registry-builtin-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  background: var(--color-border-light-tertiary, rgba(255, 255, 255, 0.06));
+  opacity: 0.75;
+}
+
+.hex-chronicle-registry-manager .hc-registry-builtin-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

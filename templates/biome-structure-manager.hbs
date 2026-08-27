@@ -2,53 +2,88 @@
   <fieldset>
     <legend><i class="fa-solid fa-mountain-sun"></i> {{localize "HEXCHRON.RegistryBiomesLegend"}}</legend>
 
-    <div class="hc-registry-list">
+    <p class="hc-registry-subheading">{{localize "HEXCHRON.RegistryCustomLabel"}}</p>
+    {{#if hasCustomBiomes}}
+    <div class="hc-registry-grid">
       {{#each customBiomes}}
-      <div class="hc-registry-row">
+      <div class="hc-registry-card">
         <span class="hc-registry-swatch" style="background-color: {{this.color}};"></span>
-        <span class="hc-registry-name">{{this.name}}</span>
-        <span class="hc-registry-slug">{{this.slug}}</span>
-        <button type="button" data-action="removeBiome" data-slug="{{this.slug}}"><i class="fa-solid fa-trash"></i></button>
+        <div class="hc-registry-card-info">
+          <span class="hc-registry-name">{{this.name}}</span>
+          <span class="hc-registry-slug">{{this.slug}}</span>
+        </div>
+        <button type="button" class="hc-registry-remove" data-action="removeBiome" data-slug="{{this.slug}}" data-tooltip="{{localize 'HEXCHRON.RegistryRemove'}}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
-      {{else}}
-      <p class="hint">{{localize "HEXCHRON.RegistryNoCustomBiomes"}}</p>
       {{/each}}
     </div>
+    {{else}}
+    <p class="hc-registry-empty hint"><i class="fa-solid fa-circle-info"></i> {{localize "HEXCHRON.RegistryNoCustomBiomes"}}</p>
+    {{/if}}
 
-    <div class="hc-registry-add">
-      <input type="text" name="newBiomeName" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
-      <input type="color" name="newBiomeColor" value="#888888" />
-      <button type="button" data-action="addBiome">{{localize "HEXCHRON.RegistryAdd"}}</button>
+    <div class="hc-registry-add-card">
+      <p class="hc-registry-add-title">{{localize "HEXCHRON.RegistryAddBiome"}}</p>
+      <div class="hc-registry-add-row">
+        <span class="hc-registry-swatch" data-preview="new-biome" style="background-color: #888888;"></span>
+        <input type="text" name="newBiomeName" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
+        <input type="color" name="newBiomeColor" value="#888888" />
+        <button type="button" class="hc-registry-add-btn" data-action="addBiome"><i class="fa-solid fa-plus"></i> {{localize "HEXCHRON.RegistryAdd"}}</button>
+      </div>
     </div>
 
-    <p class="hint">{{localize "HEXCHRON.RegistryBuiltinBiomes"}}: {{#each builtinBiomes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+    <p class="hc-registry-subheading">{{localize "HEXCHRON.RegistryBuiltinLabel"}}</p>
+    <div class="hc-registry-builtin-chips">
+      {{#each builtinBiomes}}
+      <span class="hc-registry-builtin-chip">{{this.name}}</span>
+      {{/each}}
+    </div>
   </fieldset>
 
   <fieldset>
     <legend><i class="fa-solid fa-chess-rook"></i> {{localize "HEXCHRON.RegistryStructuresLegend"}}</legend>
 
-    <div class="hc-registry-list">
+    <p class="hc-registry-subheading">{{localize "HEXCHRON.RegistryCustomLabel"}}</p>
+    {{#if hasCustomStructures}}
+    <div class="hc-registry-grid">
       {{#each customStructures}}
-      <div class="hc-registry-row">
+      <div class="hc-registry-card">
         <img class="hc-registry-icon" src="{{this.path}}" alt="{{this.name}}" />
-        <span class="hc-registry-name">{{this.name}}</span>
-        <span class="hc-registry-slug">{{this.slug}}</span>
-        <button type="button" data-action="removeStructure" data-slug="{{this.slug}}"><i class="fa-solid fa-trash"></i></button>
+        <div class="hc-registry-card-info">
+          <span class="hc-registry-name">{{this.name}}</span>
+          <span class="hc-registry-slug">{{this.slug}}</span>
+        </div>
+        <button type="button" class="hc-registry-remove" data-action="removeStructure" data-slug="{{this.slug}}" data-tooltip="{{localize 'HEXCHRON.RegistryRemove'}}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
-      {{else}}
-      <p class="hint">{{localize "HEXCHRON.RegistryNoCustomStructures"}}</p>
       {{/each}}
     </div>
+    {{else}}
+    <p class="hc-registry-empty hint"><i class="fa-solid fa-circle-info"></i> {{localize "HEXCHRON.RegistryNoCustomStructures"}}</p>
+    {{/if}}
 
-    <div class="hc-registry-add">
-      <input type="text" name="newStructureName" value="{{newStructureName}}" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
-      <button type="button" data-action="chooseStructureImage">{{localize "HEXCHRON.RegistryChooseImage"}}</button>
-      {{#if newStructurePath}}
-      <img class="hc-registry-icon-preview" src="{{newStructurePath}}" alt="" />
-      {{/if}}
-      <button type="button" data-action="addStructure">{{localize "HEXCHRON.RegistryAdd"}}</button>
+    <div class="hc-registry-add-card">
+      <p class="hc-registry-add-title">{{localize "HEXCHRON.RegistryAddStructure"}}</p>
+      <div class="hc-registry-add-row">
+        <button type="button" class="hc-registry-image-btn" data-action="chooseStructureImage" data-tooltip="{{localize 'HEXCHRON.RegistryChooseImage'}}">
+          {{#if newStructurePath}}
+          <img src="{{newStructurePath}}" alt="" />
+          {{else}}
+          <i class="fa-solid fa-image"></i>
+          {{/if}}
+        </button>
+        <input type="text" name="newStructureName" value="{{newStructureName}}" placeholder="{{localize 'HEXCHRON.RegistryNamePlaceholder'}}" />
+        <button type="button" class="hc-registry-add-btn" data-action="addStructure"><i class="fa-solid fa-plus"></i> {{localize "HEXCHRON.RegistryAdd"}}</button>
+      </div>
+      <p class="hint">{{localize "HEXCHRON.RegistryChooseImageHint"}}</p>
     </div>
 
-    <p class="hint">{{localize "HEXCHRON.RegistryBuiltinStructures"}}: {{#each builtinStructures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+    <p class="hc-registry-subheading">{{localize "HEXCHRON.RegistryBuiltinLabel"}}</p>
+    <div class="hc-registry-builtin-icons">
+      {{#each builtinStructures}}
+      <span class="hc-registry-builtin-icon" data-tooltip="{{this.name}}"><img src="{{this.src}}" alt="{{this.name}}" /></span>
+      {{/each}}
+    </div>
   </fieldset>
 </div>

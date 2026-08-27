@@ -63,9 +63,14 @@
   <fieldset>
     <legend><i class="fa-solid fa-draw-polygon"></i> {{localize "HEXCHRON.SectionZonesLinks"}}</legend>
 
-    <div class="form-group">
+    <div class="form-group stacked">
       <label>{{localize "HEXCHRON.FieldZone"}}</label>
-      <input type="text" name="zone" value="{{zone}}" placeholder="secured, dangerous" />
+      <p class="hint">{{localize "HEXCHRON.ZoneTagsHint"}}</p>
+      <div class="hc-zone-editor-root"></div>
+      <details class="hc-raw-toggle">
+        <summary>{{localize "HEXCHRON.RawTextToggle"}}</summary>
+        <input type="text" name="zone" value="{{zone}}" placeholder="secured, dangerous" />
+      </details>
     </div>
 
     <div class="form-group stacked">

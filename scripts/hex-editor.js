@@ -9,7 +9,8 @@
  *     tokens the diagram paints with, and the original N/NE/SE/S/SW/NW/C
  *     ones, work - see geometry.js/data-model.js)
  *   roads/rivers: "SW SE" (one path per line)
- *   zone: "secured, dangerous" (comma-separated)
+ *   zone: "secured, dangerous" (comma-separated) - also has a chip editor
+ *     (zone-tag-editor.js) layered on top, same as the diagrams above
  *
  * The "link" field accepts a Foundry document UUID either typed by hand or
  * dropped from the sidebar (a Journal Entry, a specific page, or a Scene) -
@@ -24,6 +25,7 @@ import { isStructureRevealed, setStructureRevealed } from "./fog.js";
 import { openHexLink } from "./links.js";
 import { attachTerrainDiagram, attachPathDiagram } from "./hex-diagram.js";
 import { attachIconPicker } from "./hex-icon-picker.js";
+import { attachZoneTagEditor } from "./zone-tag-editor.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -74,8 +76,15 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _prepareContext() {
     const scene = canvas.scene;
-    const raw = scene.getFlag(MODULE_ID, "hexes")?.[hexKey(this.col, this.row)] ?? {};
+    const allHexes = scene.getFlag(MODULE_ID, "hexes") ?? {};
+    const raw = allHexes[hexKey(this.col, this.row)] ?? {};
     const content = normalizeHexContent(raw);
+    // Every zone tag already used elsewhere on this scene, offered as
+    // autocomplete suggestions - see zone-tag-editor.js.
+    const zoneTagSuggestions = new Set();
+    for (const hexData of Object.values(allHexes)) {
+      for (const tag of normalizeHexContent(hexData).zone) zoneTagSuggestions.add(tag);
+    }
     return {
       col: this.col,
       row: this.row,
@@ -93,6 +102,7 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       roads: content.roads.join("\n"),
       rivers: content.rivers.join("\n"),
       zone: content.zone.join(", "),
+      zoneTagSuggestions: [...zoneTagSuggestions].sort(),
       link: content.link,
       structureRevealed: isStructureRevealed(this.col, this.row, scene),
     };
@@ -119,6 +129,12 @@ export class HexEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const iconInput = this.element.querySelector('input[name="icon"]');
     if (iconPickerRoot && iconInput) {
       attachIconPicker(iconPickerRoot, { input: iconInput });
+    }
+
+    const zoneEditorRoot = this.element.querySelector(".hc-zone-editor-root");
+    const zoneInput = this.element.querySelector('input[name="zone"]');
+    if (zoneEditorRoot && zoneInput) {
+      attachZoneTagEditor(zoneEditorRoot, { input: zoneInput, suggestions: context.zoneTagSuggestions ?? [] });
     }
 
     const linkInput = this.element.querySelector('input[name="link"]');

@@ -25,6 +25,12 @@
     </select>
   </header>
 
+  <datalist id="hc-overview-zone-suggestions">
+    {{#each zoneOptions}}
+    <option value="{{this}}"></option>
+    {{/each}}
+  </datalist>
+
   <div class="hc-overview-stats">
     <span class="hc-overview-stat">{{stats.total}} {{localize "HEXCHRON.OverviewHexCount"}}</span>
     {{#each stats.terrainCounts}}
@@ -41,8 +47,10 @@
     <button type="button" data-action="bulkHideTerrain">{{localize "HEXCHRON.OverviewBulkHideTerrain"}}</button>
     <button type="button" data-action="bulkRevealStructure">{{localize "HEXCHRON.OverviewBulkRevealStructure"}}</button>
     <button type="button" data-action="bulkHideStructure">{{localize "HEXCHRON.OverviewBulkHideStructure"}}</button>
-    <button type="button" data-action="bulkAddZone">{{localize "HEXCHRON.OverviewBulkAddZone"}}</button>
-    <button type="button" data-action="bulkRemoveZone">{{localize "HEXCHRON.OverviewBulkRemoveZone"}}</button>
+    <span class="hc-overview-bulk-zone-group">
+      <button type="button" data-action="bulkAddZone">{{localize "HEXCHRON.OverviewBulkAddZone"}}</button>
+      <button type="button" data-action="bulkRemoveZone">{{localize "HEXCHRON.OverviewBulkRemoveZone"}}</button>
+    </span>
     <button type="button" data-action="bulkClear">{{localize "HEXCHRON.OverviewBulkClear"}}</button>
   </div>
 
