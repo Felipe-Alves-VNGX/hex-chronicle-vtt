@@ -96,7 +96,14 @@ async function onRenderSceneConfig(app, element) {
   nav.appendChild(navItem);
 
   const tabPanel = document.createElement("div");
-  tabPanel.className = "tab";
+  // "scrollable" isn't just a naming convention - Foundry's own core CSS
+  // (`.scrollable { overflow: hidden auto; ... }`) is what actually makes a
+  // `.scene-config .tab` (itself forced to `flex: 1; height: 0` by core CSS,
+  // so it never grows past the dialog) scroll instead of clipping content
+  // taller than the window. Every core tab template (e.g. basics.hbs) has
+  // this class alongside "tab" for exactly that reason - without it, this
+  // tab's own content below the fold was unreachable.
+  tabPanel.className = "tab scrollable";
   tabPanel.dataset.group = group;
   tabPanel.dataset.tab = TAB_NAME;
   tabPanel.innerHTML = tabHtml;
